@@ -393,27 +393,110 @@ class AgentImeService : InputMethodService() {
             }
         }
 
-        val rows = listOf(
-            view.findViewById<LinearLayout>(R.id.rowAsk1),
-            view.findViewById<LinearLayout>(R.id.rowAsk2),
-            view.findViewById<LinearLayout>(R.id.rowAsk3),
-            view.findViewById<LinearLayout>(R.id.rowAskBottom)
-        )
-        val keypad = Keypad(
-            this,
-            onChar = { c -> edit.text.append(c) },
-            onBackspace = {
-                val editable = edit.text
-                if (editable.isNotEmpty()) editable.delete(editable.length - 1, editable.length)
-            },
-            onSpace = { edit.text.append(' ') },
-            onEnter = { edit.text.append('\n') },
-            onPinyinDone = { },
-            onPinyinCancel = { }
-        )
-        // Direct (Latin) layout is preserved for Ask/Answer copy operations;
-        // Chinese selection happens via the normal keyboard candidates row.
-        keypad.buildDirect(rows) { c -> edit.text.append(c) }
+val rows = listOf(
+    view.findViewById<LinearLayout>(R.id.rowAsk1),
+    view.findViewById<LinearLayout>(R.id.rowAsk2),
+    view.findViewById<LinearLayout>(R.id.rowAsk3),
+    view.findViewById<LinearLayout>(R.id.rowAskBottom)
+)
+var askPinyin = ""
+val askCandidateRow = LinearLayout(this).apply {
+    orientation = LinearLayout.HORIZONTAL
+    gravity = android.view.Gravity.CENTER_VERTICAL
+    visibility = View.GONE
+}
+val askCaption = TextView(this).apply {
+    text = "有限拼音词表·技术验证"
+    textSize = 11f
+    setTextColor(android.graphics.Color.parseColor("#667085"))
+    gravity = android.view.Gravity.CENTER
+    setPadding(8, 4, 8, 4)
+}
+val askParent = view.findViewById<LinearLayout>(R.id.askKeypad)
+if (askCaption.parent == null) askParent.addView(askCaption, 0)
+if (askCandidateRow.parent == null) askParent.addView(askCandidateRow, 1)
+var keypad: Keypad? = null
+fun refreshAskCandidates() {
+    val kp = keypad ?: return
+    kp.showCandidates(askCandidateRow, PinyinDictionary.candidates(askPinyin)) { picked ->
+        edit.text.append(picked)
+        askPinyin = ""
+        refreshAskCandidates()
+    }
+    if (askPinyin.isBlank()) {
+        askCandidateRow.visibility = View.GONE
+    } else if (PinyinDictionary.candidates(askPinyin).isNotEmpty()) {
+        askCandidateRow.visibility = View.VISIBLE
+    } else {
+        askCandidateRow.visibility = View.GONE
+    }
+}
+keypad = Keypad(
+    this,
+    onChar = { c ->
+        edit.text.append(c)
+        askPinyin = ""
+        refreshAskCandidates()
+    },
+    onBackspace = {
+        if (askPinyin.isNotEmpty()) {
+            askPinyin = askPinyin.dropLast(1)
+        } else {
+            val cur = edit.text
+            if (cur.length > 0) cur.delete(cur.length - 1, cur.length)
+        }
+        refreshAskCandidates()
+    },
+    onSpace = {
+        if (askPinyin.isNotEmpty()) {
+            val cands = PinyinDictionary.candidates(askPinyin)
+            if (cands.isNotEmpty()) {
+                edit.text.append(cands.first())
+            } else {
+                edit.text.append(askPinyin)
+            }
+            askPinyin = ""
+        }
+        edit.text.append(' ')
+        refreshAskCandidates()
+    },
+    onEnter = {
+        if (askPinyin.isNotEmpty()) {
+            val cands = PinyinDictionary.candidates(askPinyin)
+            if (cands.isNotEmpty()) {
+                edit.text.append(cands.first())
+            } else {
+                edit.text.append(askPinyin)
+            }
+            askPinyin = ""
+        }
+        edit.text.append('\n')
+        refreshAskCandidates()
+    },
+    onPinyinDone = {
+        if (askPinyin.isNotEmpty()) {
+            val cands = PinyinDictionary.candidates(askPinyin)
+            if (cands.isNotEmpty()) {
+                edit.text.append(cands.first())
+            } else {
+                edit.text.append(askPinyin)
+            }
+            askPinyin = ""
+        }
+        refreshAskCandidates()
+    },
+    onPinyinCancel = {
+        askPinyin = ""
+        refreshAskCandidates()
+    }
+)
+keypad.buildQwerty(rows) { pinyinChar ->
+    askPinyin += pinyinChar
+    refreshAskCandidates()
+}
+keypad.buildDirect(rows) { c ->
+    edit.text.append(c)
+}
     }
 
     private fun sendAsk(question: String) {

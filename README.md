@@ -1,3 +1,5 @@
+重要：最新验收状态见 [验收记录](验收记录.md)。Android 编译状态见 GitHub Actions；源码变更不代表真机验收通过。
+
 # Agent 输入法（第一阶段技术演示）
 
 本仓库是“个人 Agent 输入法”第一阶段的**实现代码**，并非可上线的产品。请阅读“已知限制”，其中若干验收项（尤其是真机验收与中文输入质量）**尚未通过**。
@@ -40,7 +42,7 @@ gradle assembleDebug
 
 ```bash
 cd backend
-cp .env.example .env   # 编辑填写 UPSTREAM_API_KEY 与 CLIENT_TOKEN
+cp .env.example .env   # 仅作为配置参考；程序不会自动加载 .env，须设置下述环境变量
 python3 -m app
 ```
 
@@ -64,7 +66,7 @@ cd backend
 python3 -m unittest discover -s tests -v
 ```
 
-**未在当前环境运行过以上测试**（本次只交付代码）。测试覆盖：健康检查、鉴权、指标鉴权、配额计数、指标不含正文。上游用到真实 DeepSeek Key 的连通性**未测**。
+**验收更新：后端12项本机测试及云端测试已通过；真实后端请求DeepSeek已返回HTTP200与有效答案。Android真机尚未验证。原实现说明：**（本次只交付代码）。测试覆盖：健康检查、鉴权、指标鉴权、配额计数、指标不含正文。上游用到真实 DeepSeek Key 的连通性**未测**。
 
 ## 数据链路与隐私声明（请如实对待）
 
@@ -110,3 +112,4 @@ python3 -m unittest discover -s tests -v
 ## 截图
 
 待真机运行后补。
+
