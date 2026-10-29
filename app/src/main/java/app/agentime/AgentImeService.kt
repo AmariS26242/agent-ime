@@ -93,36 +93,71 @@ override fun onCreateInputView(): View {
 
     override fun onStartInput(info: EditorInfo, restarting: Boolean) {
         super.onStartInput(info, restarting)
-        // No host text reads here. Only update identity metadata.
-        establishIdentity(info, resetTarget = true)
+
+        val sameEditor = isSameEditor(info, editorInfo)
+        if (restarting && sameEditor) {
+            // Restart for the same editor (e.g. after an IME-side commit that
+            // the host re-runs input-on on): do not invalidate the session.
+            // Refresh identity metadata only; preserve draft/answer/context/undo
+            // and generation so in-flight requests and undo stay valid.
+            editorInfo = info
+            hostPackage = info.packageName?.toString().orEmpty()
+            hostSensitive = isSensitive(info)
+            return
+        }
+
+        // New session (restarting == false on a new editor, or the editor
+        // identity actually changed): invalidate everything old.
+        establishNewSession(info)
     }
 
     override fun onStartInputView(info: EditorInfo, restarting: Boolean) {
         super.onStartInputView(info, restarting)
-        establishIdentity(info, resetTarget = true)
+        // InputMethodService already called onStartInput; identity and session
+        // state are established there. Only initialize if we somehow missed it.
+        if (editorInfo == null) {
+            establishNewSession(info)
+        }
         if (session.expired()) {
             session.clear()
             toast(getString(R.string.label_expired_toast))
         }
         session.touch()
-        // Normal keyboard by default whenever a new editor is shown.
-        agentVisible = false
+        // Default to the normal keyboard view for a fresh editor; preserve the
+        // currently visible agent pane when the same editor restarts.
+        if (!(restarting && agentVisible)) {
+            agentVisible = false
+        }
         applyMode()
     }
 
+    private fun isSameEditor(a: EditorInfo?, b: EditorInfo?): Boolean {
+        if (a == null || b == null) return false
+        val pkgA = a.packageName?.toString().orEmpty()
+        val pkgB = b.packageName?.toString().orEmpty()
+        if (pkgA != pkgB) return false
+        if (a.inputType != b.inputType) return false
+        val fieldA = try { a.fieldId } catch (_: Throwable) { -1 }
+        val fieldB = try { b.fieldId } catch (_: Throwable) { -1 }
+        if (fieldA != fieldB) return false
+        val nameA = a.fieldName ?: ""
+        val nameB = b.fieldName ?: ""
+        if (nameA != nameB) return false
+        return true
+    }
+
     /**
-     * Establish a new editor connection identity. Bumps generation, cancels
-     * in-flight work, clears previous target contexts and turns, and invalidates
-     * any prior write permission snapshot. Never reads host text.
+     * Establish a brand-new editor session. Bumps generation, cancels in-flight
+     * work, drops all prior target/answer/draft/context/undo state, and resets
+     * the visible mode. Never reads host text.
      */
-    private fun establishIdentity(info: EditorInfo, resetTarget: Boolean) {
+    private fun establishNewSession(info: EditorInfo) {
         generationCounter += 1L
 
         if (job != null || session.pendingRequestId != null) {
             job?.cancel()
             job = null
             session.pendingRequestId = null
-            session.statusText = getString(R.string.err_cancel)
             setBusy(false)
         }
 
@@ -130,37 +165,37 @@ override fun onCreateInputView(): View {
         hostPackage = info.packageName?.toString().orEmpty()
         hostSensitive = isSensitive(info)
 
-        if (resetTarget) {
-            // The editor changed: previous target, contexts, turns and any prior
-            // answer/draft UI state are stale. Clear them so no old Q/A leaks
-            // into the new editor.
-            session.contexts.clear()
-            session.turns.clear()
-            session.target = null
-            session.undoSnapshot = null
-            session.rewriteOriginal = null
-            session.answer = ""
-            session.answerKind = "ask"
-            session.statusText = ""
-            session.internalDraft = ""
-            session.followupDraft = ""
-            session.mode = AgentSession.Mode.ASK
+        session.contexts.clear()
+        session.turns.clear()
+        session.target = null
+        session.undoSnapshot = null
+        session.rewriteOriginal = null
+        session.answer = ""
+        session.answerKind = "ask"
+        session.statusText = ""
+        session.internalDraft = ""
+        session.followupDraft = ""
+        session.mode = AgentSession.Mode.ASK
 
-            val agent = rootAgent
-            if (agent != null) {
-                val edit = agent.findViewById<EditText>(R.id.editInternalDraft)
-                if (edit != null) edit.setText("")
-            }
+        val agent = rootAgent
+        if (agent != null) {
+            val edit = agent.findViewById<EditText>(R.id.editInternalDraft)
+            if (edit != null) edit.setText("")
         }
     }
 
     override fun onFinishInput() {
+        super.onFinishInput()
         generationCounter += 1L
-        // Invalidate write permission for the previous field.
+        job?.cancel()
+        job = null
+        session.pendingRequestId = null
         session.target = null
         session.undoSnapshot = null
-        super.onFinishInput()
+        session.rewriteOriginal = null
+        setBusy(false)
     }
+
 
     /** Sensitive-field detection only from EditorInfo flags; never reads text. */
     private fun isSensitive(info: EditorInfo): Boolean {
