@@ -5,4 +5,5 @@
         <item name="colorPrimary">@color/primary</item>
         <item name="colorAccent">@color/primary</item>
     </style>
+    <style name="AgentImeDialog" parent="android:style/Theme.Material.Light.Dialog.Alert" />
 </resources>

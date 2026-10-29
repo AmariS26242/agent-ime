@@ -49,6 +49,9 @@ class AgentImeService : InputMethodService() {
     /** Incremented each time a distinct editor connection is established. */
     private var generationCounter: Long = 0L
 
+    /** Pinyin buffer for the internal agent keypad (edit-only, never host). */
+    private var agentPinyinBuffer: String = ""
+
     override fun onCreate() {
         super.onCreate()
         session = AgentSession()
@@ -408,6 +411,8 @@ class AgentImeService : InputMethodService() {
             onPinyinDone = { },
             onPinyinCancel = { }
         )
+        // Direct (Latin) layout is preserved for Ask/Answer copy operations;
+        // Chinese selection happens via the normal keyboard candidates row.
         keypad.buildDirect(rows) { c -> edit.text.append(c) }
     }
 
@@ -564,20 +569,6 @@ class AgentImeService : InputMethodService() {
         return target
     }
 
-    /** Explicit opt-in selection read; never reads on lifecycle callbacks. */
-    private fun optInSelectedText(): String? {
-        val read = readHostTextStrict() ?: return null
-        val (text, s, e) = read
-        if (e <= s) return null
-        return text.substring(s, e)
-    }
-
-    /** Explicit opt-in full draft read; never reads on lifecycle callbacks. */
-    private fun optInAllText(): String? {
-        val read = readHostTextStrict() ?: return null
-        return read.first
-    }
-
     private fun showConfirmDialog(title: String, body: String, confirmLabel: String, onConfirm: () -> Unit) {
         // Use inline IME-window dialog; attach the IME window token to avoid
         // BadTokenException when the activity window is no longer focused.
@@ -588,19 +579,20 @@ class AgentImeService : InputMethodService() {
             toast(getString(R.string.err_target))
             return
         }
-        val dialog = AlertDialog.Builder(this, R.style.AgentImeDialog)
+        val dialog = AlertDialog.Builder(this)
             .setTitle(title)
             .setMessage(body)
             .setPositiveButton(confirmLabel) { _, _ -> onConfirm() }
-            .setNegativeButton(R.string.err_cancel, null)
+            .setNegativeButton(android.R.string.cancel, null)
             .create()
         val w: Window? = dialog.window
         if (w == null) {
             toast(getString(R.string.err_target))
             return
         }
-        val lp = WindowManager.LayoutParams()
-        lp.copyFrom(w.attributes ?: WindowManager.LayoutParams())
+        // Type must be set before showing to attach to the IME window.
+        w.setType(WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG)
+        val lp = w.attributes ?: WindowManager.LayoutParams()
         lp.token = token
         // Keep the IME visible while the dialog is shown.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -616,9 +608,15 @@ class AgentImeService : InputMethodService() {
     }
 
     /**
-     * Explicit confirmation flow for insert/replace. Snapshots the target via
-     * the already-stored [AgentSession.Target] (captured at opt-in time), then
-     * executes write only if identity and content are still identical.
+     * Explicit confirmation flow for insert/replace.
+     *
+     * - INSERT (ordinary): reads the current host state fresh at the moment the
+     *   user clicks Insert via [storeTargetFromRead], rather than requiring a
+     *   previously captured target/selection/draft context. Any prior target is
+     *   discarded so the fresh snapshot is authoritative.
+     * - REPLACE: MUST use the old opt-in snapshot (captured at Rewrite entry),
+     *   because the semantic intent is to replace exactly the originally
+     *   selected span. Re-reads are used only for defensive verification.
      */
     private fun confirmInsert(text: String, replaceSelection: Boolean) {
         if (text.isBlank()) return
@@ -628,40 +626,45 @@ class AgentImeService : InputMethodService() {
         }
         if (session.expired()) { session.clear(); applyMode(); return }
 
-        val target = session.target ?: run { toast(getString(R.string.err_target)); return }
-
-        // Basic snapshot sanity
-        if (target.generation != generationCounter) { toast(getString(R.string.err_target)); return }
         val info = editorInfo ?: run { toast(getString(R.string.err_target)); return }
-        val fieldId = try { info.fieldId } catch (_: Throwable) { -1 }
-        if (fieldId != target.fieldId || info.inputType != target.inputType) {
-            toast(getString(R.string.err_target)); return
-        }
-        if (hostPackage != target.packageName) { toast(getString(R.string.err_target)); return }
 
-        // Insert into non-empty selection is ambiguous: refuse and ask user to
-        // collapse the selection first (or use explicit Replace).
-        if (!replaceSelection && target.selectionStart != target.selectionEnd) {
-            toast("请先折叠选区再插入，或使用“替换选中”")
+        if (!replaceSelection) {
+            // INSERT: always take a fresh snapshot on explicit click.
+            // Clear any stale target first so a failed read cannot fall back.
+            session.target = null
+            val fresh = storeTargetFromRead()
+            if (fresh == null) { toast(getString(R.string.err_target)); return }
+            if (fresh.selectionStart != fresh.selectionEnd) {
+                toast("请先折叠选区再插入，或使用“替换选中”")
+                return
+            }
+            val title = "确认插入"
+            val body = "目标应用：${fresh.packageName}\n将插入到当前光标位置。"
+            showConfirmDialog(title, body, "确认") {
+                verifyAndInsertInsert(text, fresh)
+            }
             return
         }
 
-        if (replaceSelection) {
-            val original = session.rewriteOriginal ?: run { toast(getString(R.string.err_target)); return }
-            if (target.selectionStart >= target.selectionEnd) { toast(getString(R.string.err_target)); return }
-            if (target.selectionEnd > target.draftAtCreation.length) { toast(getString(R.string.err_target)); return }
-            val snapSel = target.draftAtCreation.substring(target.selectionStart, target.selectionEnd)
-            if (snapSel != original) { toast(getString(R.string.err_target)); return }
+        // REPLACE: use old opt-in snapshot.
+        val target = session.target ?: run { toast(getString(R.string.err_target)); return }
+        if (target.generation != generationCounter) { toast(getString(R.string.err_target)); return }
+        val fieldId0 = try { info.fieldId } catch (_: Throwable) { -1 }
+        if (fieldId0 != target.fieldId || info.inputType != target.inputType) {
+            toast(getString(R.string.err_target)); return
         }
+        if (hostPackage != target.packageName) { toast(getString(R.string.err_target)); return }
+        val originalSnap = session.rewriteOriginal ?: run { toast(getString(R.string.err_target)); return }
+        if (target.selectionStart >= target.selectionEnd) { toast(getString(R.string.err_target)); return }
+        if (target.selectionEnd > target.draftAtCreation.length) { toast(getString(R.string.err_target)); return }
+        val snapSel = target.draftAtCreation.substring(target.selectionStart, target.selectionEnd)
+        if (snapSel != originalSnap) { toast(getString(R.string.err_target)); return }
 
-        val title = if (replaceSelection) "确认替换选中" else "确认插入"
+        val title = "确认替换选中"
         val body = "目标应用：${target.packageName}\n" +
-            if (replaceSelection) "将替换当前选中文本（${target.selectionEnd - target.selectionStart} 字符）。"
-            else "将插入到当前光标位置。"
-
+            "将替换当前选中文本（${target.selectionEnd - target.selectionStart} 字符）。"
         showConfirmDialog(title, body, "确认") {
-            // Verify identity and content against the stored snapshot again
-            // immediately before commit.
+            // Verify against snapshot again immediately before commit.
             if (target.generation != generationCounter) { toast(getString(R.string.err_target)); return@showConfirmDialog }
             val info2 = editorInfo ?: run { toast(getString(R.string.err_target)); return@showConfirmDialog }
             val fieldId2 = try { info2.fieldId } catch (_: Throwable) { -1 }
@@ -676,18 +679,40 @@ class AgentImeService : InputMethodService() {
             if (s2 != target.selectionStart || e2 != target.selectionEnd) {
                 toast(getString(R.string.err_target)); return@showConfirmDialog
             }
-            if (replaceSelection) {
-                val original = session.rewriteOriginal ?: run { toast(getString(R.string.err_target)); return@showConfirmDialog }
-                val selNow = t2.substring(s2, e2)
-                if (selNow != original) { toast(getString(R.string.err_target)); return@showConfirmDialog }
-            }
-            performInsert(text, replaceSelection, target, t2, s2, e2)
+            val selNow = t2.substring(s2, e2)
+            if (selNow != originalSnap) { toast(getString(R.string.err_target)); return@showConfirmDialog }
+            performInsertReplace(text, target, t2, s2, e2)
         }
     }
 
-    private fun performInsert(
+    /** Verify re-check for ordinary INSERT: fresh snapshot against live host. */
+    private fun verifyAndInsertInsert(text: String, target: AgentSession.Target) {
+        if (target.generation != generationCounter) { toast(getString(R.string.err_target)); return }
+        val info = editorInfo ?: run { toast(getString(R.string.err_target)); return }
+        val fieldId = try { info.fieldId } catch (_: Throwable) { -1 }
+        if (fieldId != target.fieldId || info.inputType != target.inputType) {
+            toast(getString(R.string.err_target)); return
+        }
+        if (hostPackage != target.packageName) { toast(getString(R.string.err_target)); return }
+
+        val read = readHostTextStrict() ?: run { toast(getString(R.string.err_target)); return }
+        val (t, s, e) = read
+        if (t != target.draftAtCreation) { toast(getString(R.string.err_target)); return }
+        if (s != target.selectionStart || e != target.selectionEnd) {
+            toast(getString(R.string.err_target)); return
+        }
+        if (s != e) { toast("请先折叠选区再插入"); return }
+
+        val ic = currentInputConnection ?: run { toast(getString(R.string.err_target)); return }
+        val ok = try { ic.commitText(text, 1) } catch (_: Throwable) { false }
+        if (!ok) { toast(getString(R.string.err_target)); return }
+        session.undoSnapshot = null
+        toast("已插入当前输入框")
+        applyMode()
+    }
+
+    private fun performInsertReplace(
         text: String,
-        replaceSelection: Boolean,
         target: AgentSession.Target,
         currentText: String,
         curSelStart: Int,
@@ -699,56 +724,42 @@ class AgentImeService : InputMethodService() {
             toast(getString(R.string.err_target)); return
         }
         val ic = currentInputConnection ?: run { toast(getString(R.string.err_target)); return }
+        val original = session.rewriteOriginal ?: run { toast(getString(R.string.err_target)); return }
+        val from = curSelStart
+        val to = curSelEnd
+        if (from >= to) { toast(getString(R.string.err_target)); return }
 
-        if (replaceSelection) {
-            val original = session.rewriteOriginal ?: run { toast(getString(R.string.err_target)); return }
-            val from = curSelStart
-            val to = curSelEnd
-            if (from >= to) { toast(getString(R.string.err_target)); return }
-
-            val ok = try {
-                val selOk = ic.setSelection(from, to)
-                if (!selOk) {
-                    false
-                } else {
-                    // commitText returns boolean on API 21+; on success returns true.
-                    val commitOk = ic.commitText(text, 1)
-                    commitOk
-                }
-            } catch (_: Throwable) {
+        val ok = try {
+            val selOk = ic.setSelection(from, to)
+            if (!selOk) {
                 false
+            } else {
+                ic.commitText(text, 1)
             }
-            if (!ok) {
-                toast(getString(R.string.err_target))
-                return
-            }
-
-            val prefix = currentText.substring(0, from)
-            val suffix = currentText.substring(to)
-            val expectedAfter = prefix + text + suffix
-
-            session.undoSnapshot = AgentSession.UndoSnapshot(
-                generation = generationCounter,
-                fieldId = target.fieldId,
-                packageName = target.packageName,
-                inputType = target.inputType,
-                from = from,
-                to = from + text.length,
-                original = original,
-                inserted = text,
-                fullTextAfter = expectedAfter
-            )
-            toast("已替换")
-        } else {
-            // Insert at current cursor: only valid when no selection.
-            val ok = try { ic.commitText(text, 1) } catch (_: Throwable) { false }
-            if (!ok) {
-                toast(getString(R.string.err_target))
-                return
-            }
-            session.undoSnapshot = null
-            toast("已插入当前输入框")
+        } catch (_: Throwable) {
+            false
         }
+        if (!ok) {
+            toast(getString(R.string.err_target))
+            return
+        }
+
+        val prefix = currentText.substring(0, from)
+        val suffix = currentText.substring(to)
+        val expectedAfter = prefix + text + suffix
+
+        session.undoSnapshot = AgentSession.UndoSnapshot(
+            generation = generationCounter,
+            fieldId = target.fieldId,
+            packageName = target.packageName,
+            inputType = target.inputType,
+            from = from,
+            to = from + text.length,
+            original = original,
+            inserted = text,
+            fullTextAfter = expectedAfter
+        )
+        toast("已替换")
         applyMode()
     }
 
@@ -778,8 +789,7 @@ class AgentImeService : InputMethodService() {
             if (!selOk) {
                 false
             } else {
-                val commitOk = ic.commitText(snap.original, 1)
-                commitOk
+                ic.commitText(snap.original, 1)
             }
         } catch (_: Throwable) {
             false
