@@ -64,24 +64,32 @@ class AgentImeService : InputMethodService() {
         super.onDestroy()
     }
 
-    override fun onCreateInputView(): View {
-        val container = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundColor(android.graphics.Color.parseColor("#F7F8FA"))
-        }
-        val normal = layoutInflater.inflate(R.layout.keyboard_normal, container, false)
-        val agent = layoutInflater.inflate(R.layout.keyboard_agent, container, false)
-        container.addView(normal)
-        container.addView(agent)
-        rootNormal = normal
-        rootAgent = agent
-        rootContainer = container
-
-        wireNormal(normal)
-        wireAgent(agent)
-        applyMode()
-        return container
+override fun onCreateInputView(): View {
+    val container = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        setBackgroundColor(android.graphics.Color.parseColor("#F7F8FA"))
     }
+    val normal = layoutInflater.inflate(R.layout.keyboard_normal, container, false)
+    val agent = layoutInflater.inflate(R.layout.keyboard_agent, container, false)
+    container.addView(normal)
+    container.addView(agent)
+    rootNormal = normal
+    rootAgent = agent
+    rootContainer = container
+
+    wireNormal(normal)
+    wireAgent(agent)
+    applyMode()
+
+    androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(container) { v, insets ->
+        val navBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.navigationBars())
+        v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
+        insets
+    }
+    androidx.core.view.ViewCompat.requestApplyInsets(container)
+
+    return container
+}
 
     override fun onStartInput(info: EditorInfo, restarting: Boolean) {
         super.onStartInput(info, restarting)
@@ -493,9 +501,6 @@ keypad = Keypad(
 keypad.buildQwerty(rows) { pinyinChar ->
     askPinyin += pinyinChar
     refreshAskCandidates()
-}
-keypad.buildDirect(rows) { c ->
-    edit.text.append(c)
 }
     }
 
