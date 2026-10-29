@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#F7F8FA</color>
+    <color name="text">#182230</color>
+    <color name="text_secondary">#667085</color>
+    <color name="primary">#4169E1</color>
+    <color name="primary_pressed">#3454C4</color>
+    <color name="keycap_bg">#FFFFFF</color>
+    <color name="keycap_border">#E4E7EC</color>
+    <color name="divider">#EAECF0</color>
+    <color name="danger">#B42318</color>
+    <color name="ok">#067647</color>
+</resources>

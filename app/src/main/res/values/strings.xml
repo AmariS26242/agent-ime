@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Agent 输入法</string>
+    <string name="ime_name">Agent 输入法</string>
+
+    <string name="toolbar_agent">Agent</string>
+    <string name="toolbar_normal">普通输入</string>
+    <string name="toolbar_back_to_normal">← 返回普通输入</string>
+    <string name="toolbar_ask">问 Agent</string>
+    <string name="toolbar_rewrite">帮我改</string>
+    <string name="toolbar_session">会话…</string>
+
+    <string name="hint_ask">输入你的问题，只发送到 Agent</string>
+    <string name="hint_followup">继续追问…</string>
+    <string name="hint_rewrite">改写意图（可选，如“更简短”）</string>
+    <string name="btn_send">提问</string>
+    <string name="btn_send_followup">追问</string>
+    <string name="btn_rewrite_exec">改写</string>
+    <string name="btn_cancel">取消</string>
+    <string name="btn_retry">重试</string>
+    <string name="btn_copy">复制</string>
+    <string name="btn_insert">插入当前输入框</string>
+    <string name="btn_replace">替换选中</string>
+    <string name="btn_undo">撤销</string>
+    <string name="btn_context_add_selection">加选区</string>
+    <string name="btn_context_add_draft">加草稿</string>
+    <string name="btn_context_paste">粘贴</string>
+    <string name="btn_context_remove">移除</string>
+    <string name="btn_context_expand">展开全文</string>
+    <string name="btn_context_collapse">收起</string>
+    <string name="btn_end_session">结束会话（清空）</string>
+
+    <string name="label_question">提问</string>
+    <string name="label_answer">回答</string>
+    <string name="label_internal_prompt">输入到 Agent</string>
+    <string name="label_context_none">未附上下文</string>
+    <string name="label_context_sensitive">敏感输入，已禁用 AI 上下文</string>
+    <string name="label_context_count">上下文：%1$d 条</string>
+    <string name="label_session_expired">会话已过期，请重新打开</string>
+    <string name="label_target_changed">目标已变化，写入已失效；请重新核对</string>
+    <string name="label_expired_toast">会话过期（闲置超过 15 分钟）</string>
+
+    <string name="err_offline">当前无网络。你仍可正常输入。</string>
+    <string name="err_timeout">请求超时。草稿已保留。</string>
+    <string name="err_cancel">已取消</string>
+    <string name="err_http">请求失败</string>
+    <string name="err_unauthorized">需要登录/配置后端鉴权</string>
+    <string name="err_rate_limited">已达到今日额度</string>
+    <string name="err_target">目标已变化，拒绝写入</string>
+
+    <string name="settings_title">Agent 输入法</string>
+    <string name="settings_step_ime">1. 启用输入法（系统设置 → 语言和输入法）</string>
+    <string name="settings_step_select">2. 切换到 Agent 输入法</string>
+    <string name="settings_open_ime">打开输入法设置</string>
+    <string name="settings_open_picker">选择输入法</string>
+    <string name="settings_account">后端地址</string>
+    <string name="settings_token">鉴权令牌（客户端持有，不含上游密钥）</string>
+    <string name="settings_save">保存</string>
+    <string name="settings_saved">已保存</string>
+    <string name="privacy_title">隐私</string>
+    <string name="privacy_body">默认不读取宿主草稿或选中文字，除非你点击“加选区/加草稿/粘贴”。密码等敏感输入场景禁用 AI 上下文。本应用不记录连续按键，不保存问答正文日志；后端仅记录次数、用量、延迟、错误等指标（不含正文）。请求经由你配置的后端转发到上游模型服务，上游服务有其自身数据处理政策。</string>
+    <string name="onboarding_title">首次使用</string>
+    <string name="onboarding_body">Agent 输入法保留普通输入。点击工具条 Agent 即切换到内部提问草稿，不会修改宿主输入框；只有点击“插入”或确认“替换”才写入。</string>
+</resources>
