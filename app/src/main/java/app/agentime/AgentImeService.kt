@@ -34,6 +34,10 @@ class AgentImeService : InputMethodService() {
 
     private var rootNormal: View? = null
     private var rootAgent: View? = null
+    private var rootContainer: View? = null
+
+    /** True when the agent panel is explicitly shown; normal keyboard otherwise. */
+    private var agentVisible: Boolean = false
 
     private var pinyinBuffer: String = ""
     private var candidateContainer: LinearLayout? = null
@@ -68,6 +72,7 @@ class AgentImeService : InputMethodService() {
         container.addView(agent)
         rootNormal = normal
         rootAgent = agent
+        rootContainer = container
 
         wireNormal(normal)
         wireAgent(agent)
@@ -89,6 +94,8 @@ class AgentImeService : InputMethodService() {
             toast(getString(R.string.label_expired_toast))
         }
         session.touch()
+        // Normal keyboard by default whenever a new editor is shown.
+        agentVisible = false
         applyMode()
     }
 
@@ -113,12 +120,26 @@ class AgentImeService : InputMethodService() {
         hostSensitive = isSensitive(info)
 
         if (resetTarget) {
-            // The editor changed: previous target, contexts and turns are stale.
+            // The editor changed: previous target, contexts, turns and any prior
+            // answer/draft UI state are stale. Clear them so no old Q/A leaks
+            // into the new editor.
             session.contexts.clear()
             session.turns.clear()
             session.target = null
             session.undoSnapshot = null
             session.rewriteOriginal = null
+            session.answer = ""
+            session.answerKind = "ask"
+            session.statusText = ""
+            session.internalDraft = ""
+            session.followupDraft = ""
+            session.mode = AgentSession.Mode.ASK
+
+            val agent = rootAgent
+            if (agent != null) {
+                val edit = agent.findViewById<EditText>(R.id.editInternalDraft)
+                if (edit != null) edit.setText("")
+            }
         }
     }
 
@@ -144,6 +165,7 @@ class AgentImeService : InputMethodService() {
         if (klass == InputType.TYPE_CLASS_NUMBER && (
                 variation == InputType.TYPE_NUMBER_VARIATION_PASSWORD
                 )) return true
+        if ((info.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) != 0) return true
         return false
     }
 
@@ -155,6 +177,7 @@ class AgentImeService : InputMethodService() {
             }
             session.mode = AgentSession.Mode.ASK
             session.touch()
+            agentVisible = true
             applyMode()
         }
         pinyinBuffer = ""
@@ -227,30 +250,45 @@ class AgentImeService : InputMethodService() {
 
     private fun wireAgent(view: View) {
         view.findViewById<Button>(R.id.btnBack).setOnClickListener {
+            agentVisible = false
             session.mode = AgentSession.Mode.ASK
             session.touch()
             applyMode()
         }
         val edit = view.findViewById<EditText>(R.id.editInternalDraft)
+        edit.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                // Keep local draft in session so Back/session-end does not lose it
+                // while still inside the same editor.
+                if (session.mode == AgentSession.Mode.REWRITE) {
+                    session.internalDraft = s?.toString().orEmpty()
+                }
+            }
+        })
         view.findViewById<Button>(R.id.btnSend).setOnClickListener {
             val text = if (edit.text.isNullOrBlank()) session.followupDraft else edit.text.toString()
             if (!text.isNullOrBlank()) sendAsk(text)
         }
         view.findViewById<Button>(R.id.btnFollowup).setOnClickListener {
             session.mode = AgentSession.Mode.ASK
+            agentVisible = true
             applyMode()
         }
         view.findViewById<Button>(R.id.btnRewriteMode).setOnClickListener {
-            // Explicit opt-in: capture selection once for rewrite.
+            // Explicit opt-in: capture selection once for rewrite, now.
             if (hostSensitive) {
                 Toast.makeText(this, R.string.label_context_sensitive, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val selected = optInSelectedText()
-            if (selected.isNullOrEmpty()) {
+            val snapshot = storeTargetFromRead()
+            if (snapshot == null || snapshot.selectionStart >= snapshot.selectionEnd) {
                 Toast.makeText(this, R.string.err_target, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            session.target = snapshot
+            val selected = snapshot.draftAtCreation.substring(snapshot.selectionStart, snapshot.selectionEnd)
             session.rewriteOriginal = selected
             session.contexts.removeAll { it.source != AgentSession.Context.Source.PASTE }
             session.contexts.add(
@@ -260,6 +298,7 @@ class AgentImeService : InputMethodService() {
             session.internalDraft = if (edit.text.isNullOrBlank()) "更自然" else edit.text.toString()
             edit.setText(session.internalDraft)
             edit.setHint(R.string.hint_rewrite)
+            agentVisible = true
             applyMode()
         }
         view.findViewById<Button>(R.id.btnCancel).setOnClickListener {
@@ -293,15 +332,23 @@ class AgentImeService : InputMethodService() {
             performUndo()
         }
         view.findViewById<Button>(R.id.btnSession).setOnClickListener {
+            job?.cancel()
+            job = null
             session.clear()
             toast("会话已结束")
+            edit.setText("")
+            agentVisible = false
             applyMode()
         }
         view.findViewById<Button>(R.id.btnAddSelection).setOnClickListener {
-            // Explicit opt-in: read selection only now.
+            // Explicit opt-in: snapshot target + selected text now.
             if (hostSensitive) { toast(getString(R.string.label_context_sensitive)); return@setOnClickListener }
-            val sel = optInSelectedText()
-            if (sel.isNullOrBlank()) { toast("无选区"); return@setOnClickListener }
+            val snapshot = storeTargetFromRead()
+            if (snapshot == null || snapshot.selectionStart >= snapshot.selectionEnd) {
+                toast("无选区"); return@setOnClickListener
+            }
+            session.target = snapshot
+            val sel = snapshot.draftAtCreation.substring(snapshot.selectionStart, snapshot.selectionEnd)
             session.contexts.add(
                 AgentSession.Context("选区", sel, AgentSession.Context.Source.SELECTION)
             )
@@ -310,8 +357,11 @@ class AgentImeService : InputMethodService() {
         }
         view.findViewById<Button>(R.id.btnAddDraft).setOnClickListener {
             if (hostSensitive) { toast(getString(R.string.label_context_sensitive)); return@setOnClickListener }
-            val all = optInAllText()
-            if (all.isNullOrBlank()) { toast("草稿为空"); return@setOnClickListener }
+            val snapshot = storeTargetFromRead()
+            if (snapshot == null) { toast(getString(R.string.err_target)); return@setOnClickListener }
+            session.target = snapshot
+            val all = snapshot.draftAtCreation
+            if (all.isBlank()) { toast("草稿为空"); return@setOnClickListener }
             session.contexts.add(
                 AgentSession.Context("当前草稿", all, AgentSession.Context.Source.DRAFT)
             )
@@ -474,18 +524,44 @@ class AgentImeService : InputMethodService() {
      * unset/partial), or out-of-range selection. Never called implicitly.
      */
     private fun readHostTextStrict(): Triple<String, Int, Int>? {
+        if (hostSensitive) return null
         val ic = currentInputConnection ?: return null
         val extracted = try {
             ic.getExtractedText(android.view.inputmethod.ExtractedTextRequest(), 0)
         } catch (_: Throwable) { null } ?: return null
         // Must be a complete host-text view: startOffset must be zero.
         if (extracted.startOffset != 0) return null
+        if (extracted.partialStartOffset != -1 || extracted.partialEndOffset != -1) return null
         val text = extracted.text?.toString() ?: return null
         val s = extracted.selectionStart
         val e = extracted.selectionEnd
         if (s == -1 || e == -1) return null // partial selection -> fail closed
         if (s < 0 || e < 0 || s > e || e > text.length) return null
         return Triple(text, s, e)
+    }
+
+    /**
+     * Read host text + selection and capture it into an [AgentSession.Target]
+     * snapshot at explicit opt-in time. Used by AddSelection/Rewrite/Draft so
+     * the target reflects the exact moment the user acted.
+     */
+    private fun storeTargetFromRead(): AgentSession.Target? {
+        if (hostSensitive) return null
+        val read = readHostTextStrict() ?: return null
+        val info = editorInfo ?: return null
+        val fieldId = try { info.fieldId } catch (_: Throwable) { -1 }
+        val target = AgentSession.Target(
+            generation = generationCounter,
+            fieldId = fieldId,
+            packageName = hostPackage,
+            inputType = info.inputType,
+            selectionStart = read.second,
+            selectionEnd = read.third,
+            draftAtCreation = read.first,
+            sensitive = hostSensitive
+        )
+        session.target = target
+        return target
     }
 
     /** Explicit opt-in selection read; never reads on lifecycle callbacks. */
@@ -505,30 +581,43 @@ class AgentImeService : InputMethodService() {
     private fun showConfirmDialog(title: String, body: String, confirmLabel: String, onConfirm: () -> Unit) {
         // Use inline IME-window dialog; attach the IME window token to avoid
         // BadTokenException when the activity window is no longer focused.
-        val dialog = AlertDialog.Builder(this)
+        val agentRoot = rootAgent
+        val token = agentRoot?.windowToken
+        if (token == null) {
+            // Fail closed: cannot safely attach; do not show dialog.
+            toast(getString(R.string.err_target))
+            return
+        }
+        val dialog = AlertDialog.Builder(this, R.style.AgentImeDialog)
             .setTitle(title)
             .setMessage(body)
             .setPositiveButton(confirmLabel) { _, _ -> onConfirm() }
             .setNegativeButton(R.string.err_cancel, null)
             .create()
-        dialog.create()
         val w: Window? = dialog.window
-        if (w != null) {
-            val imeToken: android.os.IBinder? = window?.window?.attributes?.token
-            if (imeToken != null) {
-                w.setAttributes(
-                    (w.attributes ?: WindowManager.LayoutParams()).also { lp ->
-                        lp.token = imeToken
-                    }
-                )
-            }
+        if (w == null) {
+            toast(getString(R.string.err_target))
+            return
         }
-        dialog.show()
+        val lp = WindowManager.LayoutParams()
+        lp.copyFrom(w.attributes ?: WindowManager.LayoutParams())
+        lp.token = token
+        // Keep the IME visible while the dialog is shown.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            lp.flags = lp.flags or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        }
+        try {
+            w.setAttributes(lp)
+            dialog.show()
+        } catch (_: WindowManager.BadTokenException) {
+            try { dialog.dismiss() } catch (_: Throwable) {}
+            toast(getString(R.string.err_target))
+        }
     }
 
     /**
-     * Explicit confirmation flow for insert/replace. Snapshots the target and
-     * body now (only after user presses Insert/Replace + confirms), then
+     * Explicit confirmation flow for insert/replace. Snapshots the target via
+     * the already-stored [AgentSession.Target] (captured at opt-in time), then
      * executes write only if identity and content are still identical.
      */
     private fun confirmInsert(text: String, replaceSelection: Boolean) {
@@ -539,49 +628,52 @@ class AgentImeService : InputMethodService() {
         }
         if (session.expired()) { session.clear(); applyMode(); return }
 
-        val read = readHostTextStrict() ?: run { toast(getString(R.string.err_target)); return }
-        val (currentText, curSelStart, curSelEnd) = read
+        val target = session.target ?: run { toast(getString(R.string.err_target)); return }
+
+        // Basic snapshot sanity
+        if (target.generation != generationCounter) { toast(getString(R.string.err_target)); return }
+        val info = editorInfo ?: run { toast(getString(R.string.err_target)); return }
+        val fieldId = try { info.fieldId } catch (_: Throwable) { -1 }
+        if (fieldId != target.fieldId || info.inputType != target.inputType) {
+            toast(getString(R.string.err_target)); return
+        }
+        if (hostPackage != target.packageName) { toast(getString(R.string.err_target)); return }
+
+        // Insert into non-empty selection is ambiguous: refuse and ask user to
+        // collapse the selection first (or use explicit Replace).
+        if (!replaceSelection && target.selectionStart != target.selectionEnd) {
+            toast("请先折叠选区再插入，或使用“替换选中”")
+            return
+        }
 
         if (replaceSelection) {
             val original = session.rewriteOriginal ?: run { toast(getString(R.string.err_target)); return }
-            if (curSelStart >= curSelEnd || curSelEnd > currentText.length) {
-                toast(getString(R.string.err_target)); return
-            }
-            val selectedNow = currentText.substring(curSelStart, curSelEnd)
-            if (selectedNow != original) { toast(getString(R.string.err_target)); return }
+            if (target.selectionStart >= target.selectionEnd) { toast(getString(R.string.err_target)); return }
+            if (target.selectionEnd > target.draftAtCreation.length) { toast(getString(R.string.err_target)); return }
+            val snapSel = target.draftAtCreation.substring(target.selectionStart, target.selectionEnd)
+            if (snapSel != original) { toast(getString(R.string.err_target)); return }
         }
 
-        val info = editorInfo ?: run { toast(getString(R.string.err_target)); return }
-        val fieldId = try { info.fieldId } catch (_: Throwable) { -1 }
-        val previewTarget = AgentSession.Target(
-            generation = generationCounter,
-            fieldId = fieldId,
-            packageName = hostPackage,
-            inputType = info.inputType,
-            selectionStart = curSelStart,
-            selectionEnd = curSelEnd,
-            draftAtCreation = currentText,
-            sensitive = hostSensitive
-        )
-
         val title = if (replaceSelection) "确认替换选中" else "确认插入"
-        val body = "目标应用：$hostPackage\n" +
-            if (replaceSelection) "将替换当前选中文本（${curSelEnd - curSelStart} 字符）。"
+        val body = "目标应用：${target.packageName}\n" +
+            if (replaceSelection) "将替换当前选中文本（${target.selectionEnd - target.selectionStart} 字符）。"
             else "将插入到当前光标位置。"
 
         showConfirmDialog(title, body, "确认") {
-            // Snapshot and validate immediately in confirm callback; do not
-            // carry state out of the dialog closure other than via these locals.
-            val read2 = readHostTextStrict() ?: run { toast(getString(R.string.err_target)); return@showConfirmDialog }
-            val (t2, s2, e2) = read2
-            if (previewTarget.generation != generationCounter) { toast(getString(R.string.err_target)); return@showConfirmDialog }
-            if (t2 != previewTarget.draftAtCreation) { toast(getString(R.string.err_target)); return@showConfirmDialog }
-            if (s2 != previewTarget.selectionStart || e2 != previewTarget.selectionEnd) {
-                toast(getString(R.string.err_target)); return@showConfirmDialog
-            }
+            // Verify identity and content against the stored snapshot again
+            // immediately before commit.
+            if (target.generation != generationCounter) { toast(getString(R.string.err_target)); return@showConfirmDialog }
             val info2 = editorInfo ?: run { toast(getString(R.string.err_target)); return@showConfirmDialog }
             val fieldId2 = try { info2.fieldId } catch (_: Throwable) { -1 }
-            if (fieldId2 != previewTarget.fieldId || info2.inputType != previewTarget.inputType) {
+            if (fieldId2 != target.fieldId || info2.inputType != target.inputType) {
+                toast(getString(R.string.err_target)); return@showConfirmDialog
+            }
+            if (hostPackage != target.packageName) { toast(getString(R.string.err_target)); return@showConfirmDialog }
+
+            val read2 = readHostTextStrict() ?: run { toast(getString(R.string.err_target)); return@showConfirmDialog }
+            val (t2, s2, e2) = read2
+            if (t2 != target.draftAtCreation) { toast(getString(R.string.err_target)); return@showConfirmDialog }
+            if (s2 != target.selectionStart || e2 != target.selectionEnd) {
                 toast(getString(R.string.err_target)); return@showConfirmDialog
             }
             if (replaceSelection) {
@@ -589,18 +681,20 @@ class AgentImeService : InputMethodService() {
                 val selNow = t2.substring(s2, e2)
                 if (selNow != original) { toast(getString(R.string.err_target)); return@showConfirmDialog }
             }
-            performInsert(text, replaceSelection, t2, s2, e2)
+            performInsert(text, replaceSelection, target, t2, s2, e2)
         }
     }
 
     private fun performInsert(
         text: String,
         replaceSelection: Boolean,
+        target: AgentSession.Target,
         currentText: String,
         curSelStart: Int,
         curSelEnd: Int
     ) {
         if (text.isBlank()) return
+        if (target.generation != generationCounter) { toast(getString(R.string.err_target)); return }
         if (curSelStart < 0 || curSelEnd < 0 || curSelStart > curSelEnd || curSelEnd > currentText.length) {
             toast(getString(R.string.err_target)); return
         }
@@ -610,12 +704,23 @@ class AgentImeService : InputMethodService() {
             val original = session.rewriteOriginal ?: run { toast(getString(R.string.err_target)); return }
             val from = curSelStart
             val to = curSelEnd
-            ic.beginBatchEdit()
-            try {
-                ic.setSelection(from, to)
-                ic.commitText(text, 1)
-            } finally {
-                ic.endBatchEdit()
+            if (from >= to) { toast(getString(R.string.err_target)); return }
+
+            val ok = try {
+                val selOk = ic.setSelection(from, to)
+                if (!selOk) {
+                    false
+                } else {
+                    // commitText returns boolean on API 21+; on success returns true.
+                    val commitOk = ic.commitText(text, 1)
+                    commitOk
+                }
+            } catch (_: Throwable) {
+                false
+            }
+            if (!ok) {
+                toast(getString(R.string.err_target))
+                return
             }
 
             val prefix = currentText.substring(0, from)
@@ -624,9 +729,9 @@ class AgentImeService : InputMethodService() {
 
             session.undoSnapshot = AgentSession.UndoSnapshot(
                 generation = generationCounter,
-                fieldId = try { editorInfo?.fieldId ?: -1 } catch (_: Throwable) { -1 },
-                packageName = hostPackage,
-                inputType = editorInfo?.inputType ?: 0,
+                fieldId = target.fieldId,
+                packageName = target.packageName,
+                inputType = target.inputType,
                 from = from,
                 to = from + text.length,
                 original = original,
@@ -635,7 +740,12 @@ class AgentImeService : InputMethodService() {
             )
             toast("已替换")
         } else {
-            ic.commitText(text, 1)
+            // Insert at current cursor: only valid when no selection.
+            val ok = try { ic.commitText(text, 1) } catch (_: Throwable) { false }
+            if (!ok) {
+                toast(getString(R.string.err_target))
+                return
+            }
             session.undoSnapshot = null
             toast("已插入当前输入框")
         }
@@ -663,12 +773,20 @@ class AgentImeService : InputMethodService() {
         if (region != snap.inserted) { toast(getString(R.string.err_target)); return }
 
         val ic = currentInputConnection ?: run { toast(getString(R.string.err_target)); return }
-        ic.beginBatchEdit()
-        try {
-            ic.setSelection(snap.from, snap.to)
-            ic.commitText(snap.original, 1)
-        } finally {
-            ic.endBatchEdit()
+        val ok = try {
+            val selOk = ic.setSelection(snap.from, snap.to)
+            if (!selOk) {
+                false
+            } else {
+                val commitOk = ic.commitText(snap.original, 1)
+                commitOk
+            }
+        } catch (_: Throwable) {
+            false
+        }
+        if (!ok) {
+            toast(getString(R.string.err_target))
+            return
         }
         session.undoSnapshot = null
         toast("已撤销")
@@ -699,13 +817,21 @@ class AgentImeService : InputMethodService() {
         val normal = rootNormal ?: return
         val agent = rootAgent ?: return
 
+        // Default: normal keyboard visible, agent panel hidden unless agentVisible.
+        if (!agentVisible) {
+            normal.visibility = View.VISIBLE
+            agent.visibility = View.GONE
+            return
+        }
+
+        normal.visibility = View.GONE
+        agent.visibility = View.VISIBLE
+
         val undoVisible = session.undoSnapshot != null &&
             session.undoSnapshot?.generation == generationCounter
 
         when (session.mode) {
             AgentSession.Mode.ASK, AgentSession.Mode.REWRITE -> {
-                normal.visibility = View.GONE
-                agent.visibility = View.VISIBLE
                 agent.findViewById<EditText>(R.id.editInternalDraft).visibility = View.VISIBLE
                 agent.findViewById<TextView>(R.id.tvAnswer).visibility = if (session.answer.isEmpty()) View.GONE else View.VISIBLE
                 agent.findViewById<TextView>(R.id.tvAnswer).text = session.answer
@@ -731,8 +857,6 @@ class AgentImeService : InputMethodService() {
                 }
             }
             AgentSession.Mode.ANSWER -> {
-                normal.visibility = View.GONE
-                agent.visibility = View.VISIBLE
                 agent.findViewById<LinearLayout>(R.id.askKeypad).visibility = View.GONE
                 agent.findViewById<EditText>(R.id.editInternalDraft).visibility = View.GONE
                 agent.findViewById<TextView>(R.id.tvAnswer).visibility = View.VISIBLE
@@ -760,10 +884,14 @@ class AgentImeService : InputMethodService() {
             agent.findViewById<Button>(R.id.btnAddSelection).isEnabled = false
             agent.findViewById<Button>(R.id.btnAddDraft).isEnabled = false
             agent.findViewById<Button>(R.id.btnPaste).isEnabled = false
+            agent.findViewById<Button>(R.id.btnInsert).isEnabled = false
+            agent.findViewById<Button>(R.id.btnReplace).isEnabled = false
         } else {
             agent.findViewById<Button>(R.id.btnAddSelection).isEnabled = true
             agent.findViewById<Button>(R.id.btnAddDraft).isEnabled = true
             agent.findViewById<Button>(R.id.btnPaste).isEnabled = true
+            agent.findViewById<Button>(R.id.btnInsert).isEnabled = true
+            agent.findViewById<Button>(R.id.btnReplace).isEnabled = true
         }
         setBusy(session.pendingRequestId != null)
     }
