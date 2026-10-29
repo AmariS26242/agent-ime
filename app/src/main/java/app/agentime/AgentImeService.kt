@@ -851,45 +851,73 @@ keypad.buildQwerty(rows) { pinyinChar ->
         applyMode()
     }
 
-    private fun performUndo() {
-        val snap = session.undoSnapshot ?: run { toast(getString(R.string.err_target)); return }
-        if (snap.generation != generationCounter) { toast(getString(R.string.err_target)); return }
-        if (snap.packageName != hostPackage) { toast(getString(R.string.err_target)); return }
-        val info = editorInfo ?: run { toast(getString(R.string.err_target)); return }
-        val fieldId = try { info.fieldId } catch (_: Throwable) { -1 }
-        if (fieldId != snap.fieldId || info.inputType != snap.inputType) {
-            toast(getString(R.string.err_target)); return
-        }
-
-        val read = readHostTextStrict() ?: run { toast(getString(R.string.err_target)); return }
-        val (currentText, selStart, selEnd) = read
-
-        if (currentText != snap.fullTextAfter) { toast(getString(R.string.err_target)); return }
-        if (selStart != snap.from || selEnd != snap.to) {
-            toast(getString(R.string.err_target)); return
-        }
-        val region = currentText.substring(snap.from, snap.to)
-        if (region != snap.inserted) { toast(getString(R.string.err_target)); return }
-
-        val ic = currentInputConnection ?: run { toast(getString(R.string.err_target)); return }
-        val ok = try {
-            val selOk = ic.setSelection(snap.from, snap.to)
-            if (!selOk) {
-                false
-            } else {
-                ic.commitText(snap.original, 1)
-            }
-        } catch (_: Throwable) {
-            false
-        }
-        if (!ok) {
-            toast(getString(R.string.err_target))
-            return
-        }
+private fun performUndo() {
+    val snap = session.undoSnapshot ?: run { toast(getString(R.string.err_target)); return }
+    if (snap.generation != generationCounter) {
+        // Stale snapshot: drop it; recovery is via explicit Clipboard action only.
         session.undoSnapshot = null
-        toast("已撤销")
         applyMode()
+        toast(getString(R.string.err_target))
+        return
     }
+    if (snap.packageName != hostPackage) {
+        toast(getString(R.string.err_target)); return
+    }
+    val info = editorInfo ?: run { toast(getString(R.string.err_target)); return }
+    val fieldId = try { info.fieldId } catch (_: Throwable) { -1 }
+    if (fieldId != snap.fieldId || info.inputType != snap.inputType) {
+        toast(getString(R.string.err_target)); return
+    }
+    if (session.expired()) {
+        session.clear()
+        applyMode()
+        toast(getString(R.string.label_expired_toast))
+        return
+    }
+
+    val read = readHostTextStrict() ?: run { toast(getString(R.string.err_target)); return }
+    val (currentText, selStart, selEnd) = read
+
+    // Reject moved cursor: commitText(text,1) leaves collapsed cursor at snap.to.
+    if (selStart != snap.to || selEnd != snap.to) {
+        toast(getString(R.string.err_target)); return
+    }
+    // Reject changed text.
+    if (currentText != snap.fullTextAfter) {
+        toast(getString(R.string.err_target)); return
+    }
+    // Verify the inserted region is intact at [snap.from, snap.to).
+    if (snap.from < 0 || snap.to > currentText.length || snap.from > snap.to) {
+        toast(getString(R.string.err_target)); return
+    }
+    val region = currentText.substring(snap.from, snap.to)
+    if (region != snap.inserted) {
+        toast(getString(R.string.err_target)); return
+    }
+    if (snap.original.length != snap.inserted.length &&
+        currentText.length != snap.fullTextAfter.length) {
+        toast(getString(R.string.err_target)); return
+    }
+
+    val ic = currentInputConnection ?: run { toast(getString(R.string.err_target)); return }
+    val ok = try {
+        val selOk = ic.setSelection(snap.from, snap.to)
+        if (!selOk) {
+            false
+        } else {
+            ic.commitText(snap.original, 1)
+        }
+    } catch (_: Throwable) {
+        false
+    }
+    if (!ok) {
+        toast(getString(R.string.err_target))
+        return
+    }
+    session.undoSnapshot = null
+    toast("已撤销")
+    applyMode()
+}
 
     private fun commitChar(c: Char) = commitString(c.toString())
     private fun commitString(s: String) {
