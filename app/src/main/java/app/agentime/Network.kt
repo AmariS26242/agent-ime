@@ -80,7 +80,7 @@ class AgentClient(private val backend: String, private val token: String) {
                                     }
                                     401, 403 -> Result.Err(Kind.UNAUTHORIZED, text)
                                     429 -> Result.Err(Kind.RATE_LIMITED, text)
-                                    else -> Result.Err(Kind.HTTP, "HTTP ${'$'}{r.code}")
+                                    else -> Result.Err(Kind.HTTP, "HTTP ${r.code}")
                                 }
                                 if (cont.isActive) cont.resume(result)
                             }
