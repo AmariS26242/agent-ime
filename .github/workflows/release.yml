@@ -104,20 +104,30 @@ jobs:
       - name: Verify signature, ABIs and Rime assets
         run: |
           set -euo pipefail
-          APK="$(ls app/build/outputs/apk/release/*.apk | grep -v unsigned | head -n 1)"
+          APK="$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' ! -name '*unsigned*' -print -quit)"
+          if [ -z "${APK}" ]; then
+            echo "::error::no release APK produced"
+            exit 1
+          fi
           echo "APK=${APK}"
           BUILD_TOOLS="$(ls -d "${ANDROID_HOME}"/build-tools/* | sort -V | tail -n 1)"
           APKSIGNER="${BUILD_TOOLS}/apksigner"
           AAPT2="${BUILD_TOOLS}/aapt2"
+          echo "build-tools: ${BUILD_TOOLS}"
 
           "${APKSIGNER}" verify --verbose --print-certs "${APK}" | tee apksigner.txt
 
+          # apksigner prints the signer certificate digest as
+          # "Signer #1 certificate SHA-256 digest: ..." in the concise listing
+          # and as "V2 Signer: certificate SHA-256 digest: ..." with --verbose.
+          # Accept either shape, and never let a missing match abort silently.
+          CERT_LINE="$(grep -i 'certificate SHA-256 digest' apksigner.txt | tail -n 1 || true)"
+          echo "cert line: ${CERT_LINE}"
           EXPECTED_FP="2e9b48b24f0c42309594b90522bdbad6837cf1841866222870d1c603294aca1b"
-          ACTUAL_FP="$("${APKSIGNER}" verify --print-certs "${APK}" \
-            | grep -i 'Signer #1 certificate SHA-256 digest' | awk '{print $NF}' \
-            | tr -d ':' | tr 'A-F' 'a-f')"
+          ACTUAL_FP="$(printf '%s' "${CERT_LINE}" | awk '{print $NF}' | tr -d ':' | tr 'A-F' 'a-f')"
+          echo "signer sha256: '${ACTUAL_FP}'"
           if [ "${ACTUAL_FP}" != "${EXPECTED_FP}" ]; then
-            echo "::error::APK certificate SHA-256 ${ACTUAL_FP} != expected release key ${EXPECTED_FP}"
+            echo "::error::APK certificate SHA-256 '${ACTUAL_FP}' != expected release key '${EXPECTED_FP}'"
             exit 1
           fi
 
