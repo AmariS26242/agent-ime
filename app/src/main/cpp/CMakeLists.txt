@@ -30,5 +30,4 @@ target_link_libraries(rime_jni
         ${JNILIBS_DIR}/libsnappy.so
         ${JNILIBS_DIR}/libmarisa.so
         ${JNILIBS_DIR}/libopencc.so
-        ${JNILIBS_DIR}/libc++_shared.so
         log)
