@@ -1,0 +1,692 @@
+backend	Set up job	﻿2026-10-31T15:18:44.9315562Z Current runner version: '2.338.2'
+backend	Set up job	2026-10-31T15:18:44.9341430Z ##[group]Runner Image Provisioner
+backend	Set up job	2026-10-31T15:18:44.9342376Z Hosted Compute Agent
+backend	Set up job	2026-10-31T15:18:44.9343000Z Version: 20261021.618
+backend	Set up job	2026-10-31T15:18:44.9343770Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+backend	Set up job	2026-10-31T15:18:44.9345030Z Build Date: 2026-10-21T00:45:21Z
+backend	Set up job	2026-10-31T15:18:44.9345807Z Worker ID: {e1486a28-3738-4d7f-af7e-2532997e7dac}
+backend	Set up job	2026-10-31T15:18:44.9346557Z Region: westus
+backend	Set up job	2026-10-31T15:18:44.9347115Z Cloud: Azure
+backend	Set up job	2026-10-31T15:18:44.9347708Z ##[endgroup]
+backend	Set up job	2026-10-31T15:18:44.9349329Z ##[group]Operating System
+backend	Set up job	2026-10-31T15:18:44.9349990Z Ubuntu
+backend	Set up job	2026-10-31T15:18:44.9350701Z 24.04.5
+backend	Set up job	2026-10-31T15:18:44.9351232Z LTS
+backend	Set up job	2026-10-31T15:18:44.9351850Z ##[endgroup]
+backend	Set up job	2026-10-31T15:18:44.9352462Z ##[group]Runner Image
+backend	Set up job	2026-10-31T15:18:44.9353057Z Image: ubuntu-24.04
+backend	Set up job	2026-10-31T15:18:44.9353706Z Version: 20261025.353.1
+backend	Set up job	2026-10-31T15:18:44.9355139Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+backend	Set up job	2026-10-31T15:18:44.9357038Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+backend	Set up job	2026-10-31T15:18:44.9358011Z ##[endgroup]
+backend	Set up job	2026-10-31T15:18:44.9359192Z ##[group]GITHUB_TOKEN Permissions
+backend	Set up job	2026-10-31T15:18:44.9361338Z Contents: read
+backend	Set up job	2026-10-31T15:18:44.9362137Z Metadata: read
+backend	Set up job	2026-10-31T15:18:44.9362730Z ##[endgroup]
+backend	Set up job	2026-10-31T15:18:44.9365743Z Secret source: Actions
+backend	Set up job	2026-10-31T15:18:44.9366806Z Cache mode: write
+backend	Set up job	2026-10-31T15:18:44.9367556Z Prepare workflow directory
+backend	Set up job	2026-10-31T15:18:44.9715459Z Prepare all required actions
+backend	Set up job	2026-10-31T15:18:44.9765871Z Getting action download info
+backend	Set up job	2026-10-31T15:18:45.3328722Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+backend	Set up job	2026-10-31T15:18:45.4545339Z Download action repository 'actions/setup-python@v6' (SHA:ece7cb06caefa5fff74198d8649806c4678c61a1)
+backend	Set up job	2026-10-31T15:18:45.6319850Z Complete job name: backend
+backend	Checkout	﻿2026-10-31T15:18:45.7191351Z ##[group]Run actions/checkout@v4
+backend	Checkout	2026-10-31T15:18:45.7192321Z with:
+backend	Checkout	2026-10-31T15:18:45.7192787Z   repository: AmariS26242/agent-ime
+backend	Checkout	2026-10-31T15:18:45.7198091Z   token: ***
+backend	Checkout	2026-10-31T15:18:45.7198553Z   ssh-strict: true
+backend	Checkout	2026-10-31T15:18:45.7199005Z   ssh-user: git
+backend	Checkout	2026-10-31T15:18:45.7199460Z   persist-credentials: true
+backend	Checkout	2026-10-31T15:18:45.7199964Z   clean: true
+backend	Checkout	2026-10-31T15:18:45.7200431Z   sparse-checkout-cone-mode: true
+backend	Checkout	2026-10-31T15:18:45.7200963Z   fetch-depth: 1
+backend	Checkout	2026-10-31T15:18:45.7201399Z   fetch-tags: false
+backend	Checkout	2026-10-31T15:18:45.7201852Z   show-progress: true
+backend	Checkout	2026-10-31T15:18:45.7202315Z   lfs: false
+backend	Checkout	2026-10-31T15:18:45.7202735Z   submodules: false
+backend	Checkout	2026-10-31T15:18:45.7203198Z   set-safe-directory: true
+backend	Checkout	2026-10-31T15:18:45.7203711Z   allow-unsafe-pr-checkout: false
+backend	Checkout	2026-10-31T15:18:45.7204733Z ##[endgroup]
+backend	Checkout	2026-10-31T15:18:45.9870007Z Syncing repository: AmariS26242/agent-ime
+backend	Checkout	2026-10-31T15:18:45.9872154Z ##[group]Getting Git version info
+backend	Checkout	2026-10-31T15:18:45.9872989Z Working directory is '/home/runner/work/agent-ime/agent-ime'
+backend	Checkout	2026-10-31T15:18:45.9874585Z [command]/usr/bin/git version
+backend	Checkout	2026-10-31T15:18:45.9970484Z git version 2.56.0
+backend	Checkout	2026-10-31T15:18:45.9998373Z ##[endgroup]
+backend	Checkout	2026-10-31T15:18:46.0026527Z Temporarily overriding HOME='/home/runner/work/_temp/89a55095-560c-4429-acfb-9811ab2df38d' before making global git config changes
+backend	Checkout	2026-10-31T15:18:46.0032010Z Adding repository directory to the temporary git global config as a safe directory
+backend	Checkout	2026-10-31T15:18:46.0034835Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agent-ime/agent-ime
+backend	Checkout	2026-10-31T15:18:46.0111920Z Deleting the contents of '/home/runner/work/agent-ime/agent-ime'
+backend	Checkout	2026-10-31T15:18:46.0116447Z ##[group]Initializing the repository
+backend	Checkout	2026-10-31T15:18:46.0125626Z [command]/usr/bin/git init /home/runner/work/agent-ime/agent-ime
+backend	Checkout	2026-10-31T15:18:46.0260718Z hint: Using 'master' as the name for the initial branch. This default branch name
+backend	Checkout	2026-10-31T15:18:46.0263465Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+backend	Checkout	2026-10-31T15:18:46.0268431Z hint: to use in all of your new repositories, which will suppress this warning,
+backend	Checkout	2026-10-31T15:18:46.0271053Z hint: call:
+backend	Checkout	2026-10-31T15:18:46.0272255Z hint:
+backend	Checkout	2026-10-31T15:18:46.0274471Z hint: 	git config --global init.defaultBranch <name>
+backend	Checkout	2026-10-31T15:18:46.0281535Z hint:
+backend	Checkout	2026-10-31T15:18:46.0283181Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+backend	Checkout	2026-10-31T15:18:46.0285874Z hint: 'development'. The just-created branch can be renamed via this command:
+backend	Checkout	2026-10-31T15:18:46.0289181Z hint:
+backend	Checkout	2026-10-31T15:18:46.0290417Z hint: 	git branch -m <name>
+backend	Checkout	2026-10-31T15:18:46.0291678Z hint:
+backend	Checkout	2026-10-31T15:18:46.0295033Z hint: Disable this message with "git config set advice.defaultBranchName false"
+backend	Checkout	2026-10-31T15:18:46.0297948Z Initialized empty Git repository in /home/runner/work/agent-ime/agent-ime/.git/
+backend	Checkout	2026-10-31T15:18:46.0302270Z [command]/usr/bin/git remote add origin https://github.com/AmariS26242/agent-ime
+backend	Checkout	2026-10-31T15:18:46.0396220Z ##[endgroup]
+backend	Checkout	2026-10-31T15:18:46.0398427Z ##[group]Disabling automatic garbage collection
+backend	Checkout	2026-10-31T15:18:46.0401816Z [command]/usr/bin/git config --local gc.auto 0
+backend	Checkout	2026-10-31T15:18:46.0450704Z ##[endgroup]
+backend	Checkout	2026-10-31T15:18:46.0452704Z ##[group]Setting up auth
+backend	Checkout	2026-10-31T15:18:46.0460058Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+backend	Checkout	2026-10-31T15:18:46.0523435Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+backend	Checkout	2026-10-31T15:18:46.0975682Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+backend	Checkout	2026-10-31T15:18:46.1019731Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+backend	Checkout	2026-10-31T15:18:46.1267679Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+backend	Checkout	2026-10-31T15:18:46.1315588Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+backend	Checkout	2026-10-31T15:18:46.1563858Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+backend	Checkout	2026-10-31T15:18:46.1614573Z ##[endgroup]
+backend	Checkout	2026-10-31T15:18:46.1615581Z ##[group]Fetching the repository
+backend	Checkout	2026-10-31T15:18:46.1628100Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +39b8825c5fd7f407615066b5b8aadd11502907e9:refs/remotes/origin/main
+backend	Checkout	2026-10-31T15:18:46.8871952Z From https://github.com/AmariS26242/agent-ime
+backend	Checkout	2026-10-31T15:18:46.8874987Z  * [new ref]         39b8825c5fd7f407615066b5b8aadd11502907e9 -> origin/main
+backend	Checkout	2026-10-31T15:18:46.8880295Z ##[endgroup]
+backend	Checkout	2026-10-31T15:18:46.8881688Z ##[group]Determining the checkout info
+backend	Checkout	2026-10-31T15:18:46.8883030Z ##[endgroup]
+backend	Checkout	2026-10-31T15:18:46.8885332Z [command]/usr/bin/git sparse-checkout disable
+backend	Checkout	2026-10-31T15:18:46.8947170Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+backend	Checkout	2026-10-31T15:18:46.8989393Z ##[group]Checking out the ref
+backend	Checkout	2026-10-31T15:18:46.9002533Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+backend	Checkout	2026-10-31T15:18:46.9944402Z Switched to a new branch 'main'
+backend	Checkout	2026-10-31T15:18:46.9949414Z branch 'main' set up to track 'origin/main'.
+backend	Checkout	2026-10-31T15:18:46.9961600Z ##[endgroup]
+backend	Checkout	2026-10-31T15:18:47.0015619Z [command]/usr/bin/git log -1 --format=%H
+backend	Checkout	2026-10-31T15:18:47.0052342Z 39b8825c5fd7f407615066b5b8aadd11502907e9
+backend	Set up Python 3.12	﻿2026-10-31T15:18:47.0483540Z ##[group]Run actions/setup-python@v6
+backend	Set up Python 3.12	2026-10-31T15:18:47.0485116Z with:
+backend	Set up Python 3.12	2026-10-31T15:18:47.0486039Z   python-version: 3.12
+backend	Set up Python 3.12	2026-10-31T15:18:47.0487150Z   check-latest: false
+backend	Set up Python 3.12	2026-10-31T15:18:47.0498448Z   token: ***
+backend	Set up Python 3.12	2026-10-31T15:18:47.0499446Z   update-environment: true
+backend	Set up Python 3.12	2026-10-31T15:18:47.0500576Z   allow-prereleases: false
+backend	Set up Python 3.12	2026-10-31T15:18:47.0501672Z   freethreaded: false
+backend	Set up Python 3.12	2026-10-31T15:18:47.0502962Z ##[endgroup]
+backend	Set up Python 3.12	2026-10-31T15:18:47.2117898Z ##[group]Installed versions
+backend	Set up Python 3.12	2026-10-31T15:18:47.2218896Z Successfully set up CPython (3.12.15)
+backend	Set up Python 3.12	2026-10-31T15:18:47.2222340Z ##[endgroup]
+backend	Run backend tests	﻿2026-10-31T15:18:47.2441011Z ##[group]Run python -m unittest discover -s tests -v
+backend	Run backend tests	2026-10-31T15:18:47.2442571Z ^[[36;1mpython -m unittest discover -s tests -v^[[0m
+backend	Run backend tests	2026-10-31T15:18:47.2489701Z shell: /usr/bin/bash -e {0}
+backend	Run backend tests	2026-10-31T15:18:47.2491130Z env:
+backend	Run backend tests	2026-10-31T15:18:47.2492894Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+backend	Run backend tests	2026-10-31T15:18:47.2495835Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+backend	Run backend tests	2026-10-31T15:18:47.2498446Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+backend	Run backend tests	2026-10-31T15:18:47.2501522Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+backend	Run backend tests	2026-10-31T15:18:47.2504799Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+backend	Run backend tests	2026-10-31T15:18:47.2507376Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+backend	Run backend tests	2026-10-31T15:18:47.2509493Z ##[endgroup]
+backend	Run backend tests	2026-10-31T15:18:47.5070822Z test_chat_rejects_bad_json (test_app.BackendTests.test_chat_rejects_bad_json) ... ok
+backend	Run backend tests	2026-10-31T15:18:47.5080417Z test_chat_rejects_empty_body (test_app.BackendTests.test_chat_rejects_empty_body) ... ok
+backend	Run backend tests	2026-10-31T15:18:47.5090497Z test_chat_rejects_json_root_not_object (test_app.BackendTests.test_chat_rejects_json_root_not_object) ... ok
+backend	Run backend tests	2026-10-31T15:18:47.5099650Z test_chat_rejects_negative_content_length (test_app.BackendTests.test_chat_rejects_negative_content_length) ... ok
+backend	Run backend tests	2026-10-31T15:18:47.5108096Z test_chat_rejects_nonnumeric_content_length (test_app.BackendTests.test_chat_rejects_nonnumeric_content_length) ... ok
+backend	Run backend tests	2026-10-31T15:18:47.5302742Z test_chat_requires_auth (test_app.BackendTests.test_chat_requires_auth) ... ok
+backend	Run backend tests	2026-10-31T15:18:47.5310796Z test_health (test_app.BackendTests.test_health) ... ok
+backend	Run backend tests	2026-10-31T15:18:47.5323133Z test_metrics_do_not_include_content (test_app.BackendTests.test_metrics_do_not_include_content) ... ok
+backend	Run backend tests	2026-10-31T15:18:47.5333914Z test_metrics_requires_auth (test_app.BackendTests.test_metrics_requires_auth) ... ok
+backend	Run backend tests	2026-10-31T15:18:47.5345511Z test_metrics_with_auth (test_app.BackendTests.test_metrics_with_auth) ... ok
+backend	Run backend tests	2026-10-31T15:18:47.5381122Z test_quota_enforced (test_app.BackendTests.test_quota_enforced) ... ok
+backend	Run backend tests	2026-10-31T15:18:47.5417267Z test_quota_shared_across_spoofed_client_ids (test_app.BackendTests.test_quota_shared_across_spoofed_client_ids) ... ok
+backend	Run backend tests	2026-10-31T15:18:48.0417874Z 
+backend	Run backend tests	2026-10-31T15:18:48.0418500Z ----------------------------------------------------------------------
+backend	Run backend tests	2026-10-31T15:18:48.0419112Z Ran 12 tests in 0.544s
+backend	Run backend tests	2026-10-31T15:18:48.0419327Z 
+backend	Run backend tests	2026-10-31T15:18:48.0419442Z OK
+backend	Post Set up Python 3.12	﻿2026-10-31T15:18:48.0675489Z Post job cleanup.
+backend	Post Checkout	﻿2026-10-31T15:18:48.2191546Z Post job cleanup.
+backend	Post Checkout	2026-10-31T15:18:48.3157068Z [command]/usr/bin/git version
+backend	Post Checkout	2026-10-31T15:18:48.3204413Z git version 2.56.0
+backend	Post Checkout	2026-10-31T15:18:48.3252226Z Temporarily overriding HOME='/home/runner/work/_temp/a23c0c8b-3c0c-4060-bcde-0c2d7593889b' before making global git config changes
+backend	Post Checkout	2026-10-31T15:18:48.3254900Z Adding repository directory to the temporary git global config as a safe directory
+backend	Post Checkout	2026-10-31T15:18:48.3257255Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agent-ime/agent-ime
+backend	Post Checkout	2026-10-31T15:18:48.3311329Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+backend	Post Checkout	2026-10-31T15:18:48.3362979Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+backend	Post Checkout	2026-10-31T15:18:48.3645659Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+backend	Post Checkout	2026-10-31T15:18:48.3685253Z http.https://github.com/.extraheader
+backend	Post Checkout	2026-10-31T15:18:48.3700143Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+backend	Post Checkout	2026-10-31T15:18:48.3743144Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+backend	Post Checkout	2026-10-31T15:18:48.4032503Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+backend	Post Checkout	2026-10-31T15:18:48.4089772Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+backend	Complete job	﻿2026-10-31T15:18:48.4532024Z Cleaning up orphan processes
+backend	Complete job	2026-10-31T15:18:48.4925659Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+android	Set up job	﻿2026-10-31T15:18:44.8861040Z Current runner version: '2.338.2'
+android	Set up job	2026-10-31T15:18:44.8887839Z ##[group]Runner Image Provisioner
+android	Set up job	2026-10-31T15:18:44.8888770Z Hosted Compute Agent
+android	Set up job	2026-10-31T15:18:44.8889343Z Version: 20261021.618
+android	Set up job	2026-10-31T15:18:44.8889925Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+android	Set up job	2026-10-31T15:18:44.8890618Z Build Date: 2026-10-21T00:45:21Z
+android	Set up job	2026-10-31T15:18:44.8891229Z Worker ID: {6a0f5cd4-c50e-461a-82de-6b302dec0f37}
+android	Set up job	2026-10-31T15:18:44.8891882Z Region: westus3
+android	Set up job	2026-10-31T15:18:44.8892394Z Cloud: Azure
+android	Set up job	2026-10-31T15:18:44.8892863Z ##[endgroup]
+android	Set up job	2026-10-31T15:18:44.8894514Z ##[group]Operating System
+android	Set up job	2026-10-31T15:18:44.8895089Z Ubuntu
+android	Set up job	2026-10-31T15:18:44.8895657Z 24.04.5
+android	Set up job	2026-10-31T15:18:44.8896127Z LTS
+android	Set up job	2026-10-31T15:18:44.8896572Z ##[endgroup]
+android	Set up job	2026-10-31T15:18:44.8897204Z ##[group]Runner Image
+android	Set up job	2026-10-31T15:18:44.8897738Z Image: ubuntu-24.04
+android	Set up job	2026-10-31T15:18:44.8898260Z Version: 20261025.353.1
+android	Set up job	2026-10-31T15:18:44.8899222Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+android	Set up job	2026-10-31T15:18:44.8900846Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+android	Set up job	2026-10-31T15:18:44.8901710Z ##[endgroup]
+android	Set up job	2026-10-31T15:18:44.8903110Z ##[group]GITHUB_TOKEN Permissions
+android	Set up job	2026-10-31T15:18:44.8905741Z Contents: read
+android	Set up job	2026-10-31T15:18:44.8906380Z Metadata: read
+android	Set up job	2026-10-31T15:18:44.8906896Z ##[endgroup]
+android	Set up job	2026-10-31T15:18:44.8908984Z Secret source: Actions
+android	Set up job	2026-10-31T15:18:44.8909906Z Cache mode: write
+android	Set up job	2026-10-31T15:18:44.8910558Z Prepare workflow directory
+android	Set up job	2026-10-31T15:18:44.9301818Z Prepare all required actions
+android	Set up job	2026-10-31T15:18:44.9353371Z Getting action download info
+android	Set up job	2026-10-31T15:18:45.2416749Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+android	Set up job	2026-10-31T15:18:45.3429402Z Download action repository 'actions/setup-java@v5' (SHA:b6effb05e454b25005698d916606bdc6ffcbf961)
+android	Set up job	2026-10-31T15:18:46.0487795Z Download action repository 'gradle/actions@v4' (SHA:ed408507eac070d1f99cc633dbcf757c94c7933a)
+android	Set up job	2026-10-31T15:18:47.2041739Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+android	Set up job	2026-10-31T15:18:47.4201241Z Complete job name: android
+android	Checkout	﻿2026-10-31T15:18:47.5158626Z ##[group]Run actions/checkout@v4
+android	Checkout	2026-10-31T15:18:47.5159400Z with:
+android	Checkout	2026-10-31T15:18:47.5159774Z   repository: AmariS26242/agent-ime
+android	Checkout	2026-10-31T15:18:47.5162934Z   token: ***
+android	Checkout	2026-10-31T15:18:47.5163289Z   ssh-strict: true
+android	Checkout	2026-10-31T15:18:47.5163633Z   ssh-user: git
+android	Checkout	2026-10-31T15:18:47.5164302Z   persist-credentials: true
+android	Checkout	2026-10-31T15:18:47.5164730Z   clean: true
+android	Checkout	2026-10-31T15:18:47.5165089Z   sparse-checkout-cone-mode: true
+android	Checkout	2026-10-31T15:18:47.5165484Z   fetch-depth: 1
+android	Checkout	2026-10-31T15:18:47.5165818Z   fetch-tags: false
+android	Checkout	2026-10-31T15:18:47.5166154Z   show-progress: true
+android	Checkout	2026-10-31T15:18:47.5166563Z   lfs: false
+android	Checkout	2026-10-31T15:18:47.5166901Z   submodules: false
+android	Checkout	2026-10-31T15:18:47.5167248Z   set-safe-directory: true
+android	Checkout	2026-10-31T15:18:47.5167664Z   allow-unsafe-pr-checkout: false
+android	Checkout	2026-10-31T15:18:47.5168438Z ##[endgroup]
+android	Checkout	2026-10-31T15:18:47.9261514Z Syncing repository: AmariS26242/agent-ime
+android	Checkout	2026-10-31T15:18:47.9263641Z ##[group]Getting Git version info
+android	Checkout	2026-10-31T15:18:47.9265011Z Working directory is '/home/runner/work/agent-ime/agent-ime'
+android	Checkout	2026-10-31T15:18:47.9266375Z [command]/usr/bin/git version
+android	Checkout	2026-10-31T15:18:47.9391422Z git version 2.56.0
+android	Checkout	2026-10-31T15:18:47.9440214Z ##[endgroup]
+android	Checkout	2026-10-31T15:18:47.9495862Z Temporarily overriding HOME='/home/runner/work/_temp/a2442562-cab8-4052-bbd3-2eb100344fa6' before making global git config changes
+android	Checkout	2026-10-31T15:18:47.9503830Z Adding repository directory to the temporary git global config as a safe directory
+android	Checkout	2026-10-31T15:18:47.9505378Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agent-ime/agent-ime
+android	Checkout	2026-10-31T15:18:47.9558387Z Deleting the contents of '/home/runner/work/agent-ime/agent-ime'
+android	Checkout	2026-10-31T15:18:47.9571678Z ##[group]Initializing the repository
+android	Checkout	2026-10-31T15:18:47.9573272Z [command]/usr/bin/git init /home/runner/work/agent-ime/agent-ime
+android	Checkout	2026-10-31T15:18:47.9694749Z hint: Using 'master' as the name for the initial branch. This default branch name
+android	Checkout	2026-10-31T15:18:47.9696618Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+android	Checkout	2026-10-31T15:18:47.9697845Z hint: to use in all of your new repositories, which will suppress this warning,
+android	Checkout	2026-10-31T15:18:47.9698766Z hint: call:
+android	Checkout	2026-10-31T15:18:47.9699362Z hint:
+android	Checkout	2026-10-31T15:18:47.9700037Z hint: 	git config --global init.defaultBranch <name>
+android	Checkout	2026-10-31T15:18:47.9700824Z hint:
+android	Checkout	2026-10-31T15:18:47.9701786Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+android	Checkout	2026-10-31T15:18:47.9718497Z hint: 'development'. The just-created branch can be renamed via this command:
+android	Checkout	2026-10-31T15:18:47.9719699Z hint:
+android	Checkout	2026-10-31T15:18:47.9720313Z hint: 	git branch -m <name>
+android	Checkout	2026-10-31T15:18:47.9720994Z hint:
+android	Checkout	2026-10-31T15:18:47.9721867Z hint: Disable this message with "git config set advice.defaultBranchName false"
+android	Checkout	2026-10-31T15:18:47.9723136Z Initialized empty Git repository in /home/runner/work/agent-ime/agent-ime/.git/
+android	Checkout	2026-10-31T15:18:47.9728025Z [command]/usr/bin/git remote add origin https://github.com/AmariS26242/agent-ime
+android	Checkout	2026-10-31T15:18:47.9795929Z ##[endgroup]
+android	Checkout	2026-10-31T15:18:47.9796981Z ##[group]Disabling automatic garbage collection
+android	Checkout	2026-10-31T15:18:47.9800534Z [command]/usr/bin/git config --local gc.auto 0
+android	Checkout	2026-10-31T15:18:47.9861104Z ##[endgroup]
+android	Checkout	2026-10-31T15:18:47.9862622Z ##[group]Setting up auth
+android	Checkout	2026-10-31T15:18:47.9863833Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+android	Checkout	2026-10-31T15:18:47.9949927Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+android	Checkout	2026-10-31T15:18:48.0329709Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+android	Checkout	2026-10-31T15:18:48.0363726Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+android	Checkout	2026-10-31T15:18:48.0564718Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+android	Checkout	2026-10-31T15:18:48.0601109Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+android	Checkout	2026-10-31T15:18:48.0803088Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+android	Checkout	2026-10-31T15:18:48.0845342Z ##[endgroup]
+android	Checkout	2026-10-31T15:18:48.0846669Z ##[group]Fetching the repository
+android	Checkout	2026-10-31T15:18:48.0859141Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +39b8825c5fd7f407615066b5b8aadd11502907e9:refs/remotes/origin/main
+android	Checkout	2026-10-31T15:18:48.9799645Z From https://github.com/AmariS26242/agent-ime
+android	Checkout	2026-10-31T15:18:48.9800473Z  * [new ref]         39b8825c5fd7f407615066b5b8aadd11502907e9 -> origin/main
+android	Checkout	2026-10-31T15:18:48.9806194Z ##[endgroup]
+android	Checkout	2026-10-31T15:18:48.9806641Z ##[group]Determining the checkout info
+android	Checkout	2026-10-31T15:18:48.9811690Z ##[endgroup]
+android	Checkout	2026-10-31T15:18:48.9818602Z [command]/usr/bin/git sparse-checkout disable
+android	Checkout	2026-10-31T15:18:48.9867026Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+android	Checkout	2026-10-31T15:18:48.9897390Z ##[group]Checking out the ref
+android	Checkout	2026-10-31T15:18:48.9910917Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+android	Checkout	2026-10-31T15:18:49.0883442Z Switched to a new branch 'main'
+android	Checkout	2026-10-31T15:18:49.0887255Z branch 'main' set up to track 'origin/main'.
+android	Checkout	2026-10-31T15:18:49.0902330Z ##[endgroup]
+android	Checkout	2026-10-31T15:18:49.0940669Z [command]/usr/bin/git log -1 --format=%H
+android	Checkout	2026-10-31T15:18:49.0965018Z 39b8825c5fd7f407615066b5b8aadd11502907e9
+android	Set up JDK 17	﻿2026-10-31T15:18:49.1281346Z ##[group]Run actions/setup-java@v5
+android	Set up JDK 17	2026-10-31T15:18:49.1281833Z with:
+android	Set up JDK 17	2026-10-31T15:18:49.1282337Z   distribution: temurin
+android	Set up JDK 17	2026-10-31T15:18:49.1282819Z   java-version: 17
+android	Set up JDK 17	2026-10-31T15:18:49.1283041Z   java-package: jdk
+android	Set up JDK 17	2026-10-31T15:18:49.1283260Z   check-latest: false
+android	Set up JDK 17	2026-10-31T15:18:49.1283478Z   set-default: true
+android	Set up JDK 17	2026-10-31T15:18:49.1283700Z   verify-signature: false
+android	Set up JDK 17	2026-10-31T15:18:49.1283933Z   server-id: github
+android	Set up JDK 17	2026-10-31T15:18:49.1284439Z   server-username: GITHUB_ACTOR
+android	Set up JDK 17	2026-10-31T15:18:49.1284713Z   server-password: GITHUB_TOKEN
+android	Set up JDK 17	2026-10-31T15:18:49.1284981Z   overwrite-settings: true
+android	Set up JDK 17	2026-10-31T15:18:49.1285313Z   job-status: success
+android	Set up JDK 17	2026-10-31T15:18:49.1287963Z   token: ***
+android	Set up JDK 17	2026-10-31T15:18:49.1288267Z   show-download-progress: false
+android	Set up JDK 17	2026-10-31T15:18:49.1288558Z ##[endgroup]
+android	Set up JDK 17	2026-10-31T15:18:49.2896451Z ##[group]Installed distributions
+android	Set up JDK 17	2026-10-31T15:18:49.2958936Z Resolved Java 17.0.21+9 from tool-cache
+android	Set up JDK 17	2026-10-31T15:18:49.2959564Z Setting Java 17.0.21+9 as the default
+android	Set up JDK 17	2026-10-31T15:18:49.2969801Z Creating toolchains.xml for JDK version 17 from temurin
+android	Set up JDK 17	2026-10-31T15:18:49.3042125Z Writing to /home/runner/.m2/toolchains.xml
+android	Set up JDK 17	2026-10-31T15:18:49.3043161Z 
+android	Set up JDK 17	2026-10-31T15:18:49.3044105Z Java configuration:
+android	Set up JDK 17	2026-10-31T15:18:49.3044589Z   Distribution: temurin
+android	Set up JDK 17	2026-10-31T15:18:49.3044974Z   Version: 17.0.21+9
+android	Set up JDK 17	2026-10-31T15:18:49.3045520Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+android	Set up JDK 17	2026-10-31T15:18:49.3046005Z 
+android	Set up JDK 17	2026-10-31T15:18:49.3046566Z ##[endgroup]
+android	Set up JDK 17	2026-10-31T15:18:49.3081352Z Creating settings.xml with server-id: github
+android	Set up JDK 17	2026-10-31T15:18:49.3081756Z Writing to /home/runner/.m2/settings.xml
+android	Set up JDK 17	2026-10-31T15:18:49.3082434Z Configured MAVEN_ARGS to include -ntp to suppress Maven transfer progress logs. Set 'show-download-progress: true' to keep the download progress output.
+android	Set up Gradle	﻿2026-10-31T15:18:49.3454710Z ##[group]Run gradle/actions/setup-gradle@v4
+android	Set up Gradle	2026-10-31T15:18:49.3455203Z with:
+android	Set up Gradle	2026-10-31T15:18:49.3455417Z   gradle-version: 8.7
+android	Set up Gradle	2026-10-31T15:18:49.3455736Z   cache-disabled: false
+android	Set up Gradle	2026-10-31T15:18:49.3456119Z   cache-read-only: false
+android	Set up Gradle	2026-10-31T15:18:49.3456514Z   cache-write-only: false
+android	Set up Gradle	2026-10-31T15:18:49.3456921Z   cache-overwrite-existing: false
+android	Set up Gradle	2026-10-31T15:18:49.3457397Z   cache-cleanup: on-success
+android	Set up Gradle	2026-10-31T15:18:49.3457875Z   gradle-home-cache-includes: caches
+android	Set up Gradle	notifications
+android	Set up Gradle	
+android	Set up Gradle	2026-10-31T15:18:49.3458399Z   add-job-summary: always
+android	Set up Gradle	2026-10-31T15:18:49.3458808Z   add-job-summary-as-pr-comment: never
+android	Set up Gradle	2026-10-31T15:18:49.3459104Z   dependency-graph: disabled
+android	Set up Gradle	2026-10-31T15:18:49.3459412Z   dependency-graph-report-dir: dependency-graph-reports
+android	Set up Gradle	2026-10-31T15:18:49.3460019Z   dependency-graph-continue-on-failure: true
+android	Set up Gradle	2026-10-31T15:18:49.3460371Z   build-scan-publish: false
+android	Set up Gradle	2026-10-31T15:18:49.3460762Z   validate-wrappers: true
+android	Set up Gradle	2026-10-31T15:18:49.3461070Z   allow-snapshot-wrappers: false
+android	Set up Gradle	2026-10-31T15:18:49.3461571Z   gradle-home-cache-strict-match: false
+android	Set up Gradle	2026-10-31T15:18:49.3462542Z   workflow-job-context: null
+android	Set up Gradle	2026-10-31T15:18:49.3468068Z   github-token: ***
+android	Set up Gradle	2026-10-31T15:18:49.3468691Z env:
+android	Set up Gradle	2026-10-31T15:18:49.3469379Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+android	Set up Gradle	2026-10-31T15:18:49.3470367Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+android	Set up Gradle	2026-10-31T15:18:49.3471283Z   MAVEN_ARGS: -ntp
+android	Set up Gradle	2026-10-31T15:18:49.3471605Z ##[endgroup]
+android	Set up Gradle	2026-10-31T15:18:50.6967722Z Merged default JDK locations into /home/runner/.m2/toolchains.xml
+android	Set up Gradle	2026-10-31T15:18:50.6970371Z Preparing cache for cleanup.
+android	Set up Gradle	2026-10-31T15:18:50.6975803Z ##[group]Restore Gradle state from cache
+android	Set up Gradle	2026-10-31T15:18:50.9057630Z Cache hit for restore-key: gradle-home-v1|Linux-X64|android[751e3a27013e646c8eb8af27bfacc3ef]-e5b216183f135918d80f4063daaa64aca5abfe0e
+android	Set up Gradle	2026-10-31T15:18:52.0243151Z Received 1708170 of 1708170 (100.0%), 1.9 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:52.0246346Z Cache Size: ~2 MB (1708170 B)
+android	Set up Gradle	2026-10-31T15:18:52.0280614Z [command]/usr/bin/tar -xf /home/runner/work/_temp/3a5704e4-97d9-44f5-90f4-aa0f91ff2d23/cache.tzst -P -C /home/runner/work/agent-ime/agent-ime --use-compress-program unzstd
+android	Set up Gradle	2026-10-31T15:18:52.0732959Z Cache restored successfully
+android	Set up Gradle	2026-10-31T15:18:52.0738426Z Restored cache entry with key gradle-home-v1|Linux-X64|android[751e3a27013e646c8eb8af27bfacc3ef]-39b8825c5fd7f407615066b5b8aadd11502907e9 to /home/runner/.gradle/caches,/home/runner/.gradle/notifications,/home/runner/.gradle/.setup-gradle in 1374ms
+android	Set up Gradle	2026-10-31T15:18:52.2774698Z Cache hit for: gradle-generated-gradle-jars-v1-d6d47bedd9337a0be6f3a426277e63ee
+android	Set up Gradle	2026-10-31T15:18:52.2779984Z Cache hit for: gradle-instrumented-jars-v1-c0586cebba4e7e143a914232baa9f0f1
+android	Set up Gradle	2026-10-31T15:18:52.2792119Z Cache hit for: gradle-kotlin-dsl-v1-810e1489df97f6acfa6bf262ca28a5b4
+android	Set up Gradle	2026-10-31T15:18:52.2896469Z Cache hit for: gradle-transforms-v1-128c79aa44b83994fd43fd37353e1d9c
+android	Set up Gradle	2026-10-31T15:18:52.2900520Z Cache hit for: gradle-dependencies-v1-6c01ec6571f9e45563324dfd9819de39
+android	Set up Gradle	2026-10-31T15:18:52.2903776Z Cache hit for: gradle-groovy-dsl-v1-ea307bbe8b8e4a27858d8971f1543847
+android	Set up Gradle	2026-10-31T15:18:52.5385493Z Received 104226 of 104226 (100.0%), 0.5 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:52.5396048Z Cache Size: ~0 MB (104226 B)
+android	Set up Gradle	2026-10-31T15:18:52.5476173Z [command]/usr/bin/tar -xf /home/runner/work/_temp/0b47b69b-9d68-4ad1-9677-73998970d747/cache.tzst -P -C /home/runner/work/agent-ime/agent-ime --use-compress-program unzstd
+android	Set up Gradle	2026-10-31T15:18:52.5897632Z Cache restored successfully
+android	Set up Gradle	2026-10-31T15:18:52.5900024Z Restored cache entry with key gradle-kotlin-dsl-v1-810e1489df97f6acfa6bf262ca28a5b4 to /home/runner/.gradle/caches/*/kotlin-dsl/accessors/*/,/home/runner/.gradle/caches/*/kotlin-dsl/scripts/*/ in 502ms
+android	Set up Gradle	2026-10-31T15:18:52.8891567Z Received 145733 of 145733 (100.0%), 0.4 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:52.8892061Z Cache Size: ~0 MB (145733 B)
+android	Set up Gradle	2026-10-31T15:18:52.8912172Z [command]/usr/bin/tar -xf /home/runner/work/_temp/2e8169bd-7fe3-4594-96ae-cab717db83bd/cache.tzst -P -C /home/runner/work/agent-ime/agent-ime --use-compress-program unzstd
+android	Set up Gradle	2026-10-31T15:18:52.9043346Z Cache restored successfully
+android	Set up Gradle	2026-10-31T15:18:52.9045089Z Restored cache entry with key gradle-groovy-dsl-v1-ea307bbe8b8e4a27858d8971f1543847 to /home/runner/.gradle/caches/*/groovy-dsl/*/ in 829ms
+android	Set up Gradle	2026-10-31T15:18:52.9493709Z Received 90347 of 90347 (100.0%), 0.2 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:52.9494623Z Cache Size: ~0 MB (90347 B)
+android	Set up Gradle	2026-10-31T15:18:52.9511016Z [command]/usr/bin/tar -xf /home/runner/work/_temp/e0dfa693-efbe-4e66-8f9f-38e76f3aa275/cache.tzst -P -C /home/runner/work/agent-ime/agent-ime --use-compress-program unzstd
+android	Set up Gradle	2026-10-31T15:18:52.9607487Z Cache restored successfully
+android	Set up Gradle	2026-10-31T15:18:52.9608903Z Restored cache entry with key gradle-instrumented-jars-v1-c0586cebba4e7e143a914232baa9f0f1 to /home/runner/.gradle/caches/jars-*/*/ in 885ms
+android	Set up Gradle	2026-10-31T15:18:53.4861200Z Received 33751842 of 37946146 (88.9%), 32.2 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:53.5238615Z Received 12582912 of 109474349 (11.5%), 12.0 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:53.5566046Z Received 37946146 of 37946146 (100.0%), 33.8 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:53.5568956Z Cache Size: ~36 MB (37946146 B)
+android	Set up Gradle	2026-10-31T15:18:53.5619144Z Received 25165824 of 174370317 (14.4%), 24.0 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:53.5707121Z [command]/usr/bin/tar -xf /home/runner/work/_temp/0a6c47db-b9eb-4ccd-9bde-926fd16e1294/cache.tzst -P -C /home/runner/work/agent-ime/agent-ime --use-compress-program unzstd
+android	Set up Gradle	2026-10-31T15:18:53.8511427Z Cache restored successfully
+android	Set up Gradle	2026-10-31T15:18:53.8586308Z Restored cache entry with key gradle-generated-gradle-jars-v1-d6d47bedd9337a0be6f3a426277e63ee to /home/runner/.gradle/caches/8.7/generated-gradle-jars/gradle-api-8.7.jar in 1779ms
+android	Set up Gradle	2026-10-31T15:18:54.5243215Z Received 96891437 of 109474349 (88.5%), 46.2 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:54.5619970Z Received 96468992 of 174370317 (55.3%), 46.0 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:54.6928411Z Received 109474349 of 109474349 (100.0%), 48.1 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:54.6931532Z Cache Size: ~104 MB (109474349 B)
+android	Set up Gradle	2026-10-31T15:18:54.7117184Z [command]/usr/bin/tar -xf /home/runner/work/_temp/8c97276b-785b-4247-93a3-1d19c23d3c0c/cache.tzst -P -C /home/runner/work/agent-ime/agent-ime --use-compress-program unzstd
+android	Set up Gradle	2026-10-31T15:18:55.5555214Z Cache restored successfully
+android	Set up Gradle	2026-10-31T15:18:55.5625534Z Received 163577856 of 174370317 (93.8%), 52.0 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:55.5634959Z Restored cache entry with key gradle-transforms-v1-128c79aa44b83994fd43fd37353e1d9c to /home/runner/.gradle/caches/transforms-4/*/,/home/runner/.gradle/caches/*/transforms/*/ in 3486ms
+android	Set up Gradle	2026-10-31T15:18:55.7748545Z Received 174370317 of 174370317 (100.0%), 51.7 MBs/sec
+android	Set up Gradle	2026-10-31T15:18:55.7749185Z Cache Size: ~166 MB (174370317 B)
+android	Set up Gradle	2026-10-31T15:18:55.7770952Z [command]/usr/bin/tar -xf /home/runner/work/_temp/8b399850-c866-406d-9431-c0435834b522/cache.tzst -P -C /home/runner/work/agent-ime/agent-ime --use-compress-program unzstd
+android	Set up Gradle	2026-10-31T15:18:56.0022778Z Cache restored successfully
+android	Set up Gradle	2026-10-31T15:18:56.0078632Z Restored cache entry with key gradle-dependencies-v1-6c01ec6571f9e45563324dfd9819de39 to /home/runner/.gradle/caches/modules-*/files-*/*/*/*/* in 3933ms
+android	Set up Gradle	2026-10-31T15:18:56.0227355Z ##[endgroup]
+android	Set up Gradle	2026-10-31T15:18:56.0307513Z ##[group]All Gradle Wrapper jars are valid
+android	Set up Gradle	2026-10-31T15:18:56.0309796Z ✓ Found known Gradle Wrapper JAR files:
+android	Set up Gradle	2026-10-31T15:18:56.0310474Z   2db75c40782f5e8ba1fc278a5574bab070adccb2d21ca5a6e5ed840888448046 gradle/wrapper/gradle-wrapper.jar
+android	Set up Gradle	2026-10-31T15:18:56.0311312Z ##[endgroup]
+android	Set up Gradle	2026-10-31T15:18:56.1213324Z ##[group]Provision Gradle 8.7
+android	Set up Gradle	2026-10-31T15:19:00.2067888Z Cache hit for: gradle-8.7
+android	Set up Gradle	2026-10-31T15:19:01.2640197Z Received 46137344 of 133909426 (34.5%), 44.0 MBs/sec
+android	Set up Gradle	2026-10-31T15:19:01.9574209Z Received 133909426 of 133909426 (100.0%), 75.4 MBs/sec
+android	Set up Gradle	2026-10-31T15:19:01.9576405Z Cache Size: ~128 MB (133909426 B)
+android	Set up Gradle	2026-10-31T15:19:01.9650273Z [command]/usr/bin/tar -xf /home/runner/work/_temp/fd281023-f91c-47c5-a0de-33ee1b6d79ac/cache.tzst -P -C /home/runner/work/agent-ime/agent-ime --use-compress-program unzstd
+android	Set up Gradle	2026-10-31T15:19:02.1009076Z Cache restored successfully
+android	Set up Gradle	2026-10-31T15:19:02.1055015Z Restored Gradle distribution gradle-8.7 from cache to /home/runner/work/_temp/.gradle-actions/gradle-installations/downloads/gradle-8.7-bin.zip
+android	Set up Gradle	2026-10-31T15:19:02.1072685Z [command]/usr/bin/unzip -o -q /home/runner/work/_temp/.gradle-actions/gradle-installations/downloads/gradle-8.7-bin.zip
+android	Set up Gradle	2026-10-31T15:19:03.0714923Z Extracted Gradle 8.7 to /home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-8.7
+android	Set up Gradle	2026-10-31T15:19:03.0716883Z Provisioned Gradle executable /home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-8.7/bin/gradle
+android	Set up Gradle	2026-10-31T15:19:03.0723562Z ##[endgroup]
+android	Install Android SDK packages	﻿2026-10-31T15:19:03.0929037Z ##[group]Run if [ -z "${ANDROID_HOME}" ]; then
+android	Install Android SDK packages	2026-10-31T15:19:03.0929543Z ^[[36;1mif [ -z "${ANDROID_HOME}" ]; then^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0929913Z ^[[36;1m  echo "ANDROID_HOME is not set" >&2^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0930241Z ^[[36;1m  exit 1^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0930489Z ^[[36;1mfi^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0930850Z ^[[36;1mSDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0931295Z ^[[36;1mif [ ! -x "${SDKMANAGER}" ]; then^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0931849Z ^[[36;1m  SDKMANAGER="$(find "${ANDROID_HOME}/cmdline-tools" -type f -name sdkmanager 2>/dev/null | head -n 1)"^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0932364Z ^[[36;1mfi^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0932704Z ^[[36;1mif [ -z "${SDKMANAGER}" ] || [ ! -x "${SDKMANAGER}" ]; then^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0933194Z ^[[36;1m  echo "sdkmanager not found under ${ANDROID_HOME}/cmdline-tools" >&2^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0933622Z ^[[36;1m  exit 1^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0933862Z ^[[36;1mfi^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0934401Z ^[[36;1mecho "Using sdkmanager: ${SDKMANAGER}"^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0934872Z ^[[36;1myes | "${SDKMANAGER}" --licenses > /dev/null || true^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0935320Z ^[[36;1m"${SDKMANAGER}" "platforms;android-35" "build-tools;35.0.0"^[[0m
+android	Install Android SDK packages	2026-10-31T15:19:03.0952816Z shell: /usr/bin/bash -e {0}
+android	Install Android SDK packages	2026-10-31T15:19:03.0953156Z env:
+android	Install Android SDK packages	2026-10-31T15:19:03.0953516Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+android	Install Android SDK packages	2026-10-31T15:19:03.0954297Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+android	Install Android SDK packages	2026-10-31T15:19:03.0954715Z   MAVEN_ARGS: -ntp
+android	Install Android SDK packages	2026-10-31T15:19:03.0955022Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+android	Install Android SDK packages	2026-10-31T15:19:03.0955374Z   GRADLE_USER_HOME: /home/runner/.gradle
+android	Install Android SDK packages	2026-10-31T15:19:03.0955945Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+android	Install Android SDK packages	2026-10-31T15:19:03.0956302Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+android	Install Android SDK packages	2026-10-31T15:19:03.0956786Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+android	Install Android SDK packages	2026-10-31T15:19:03.0957305Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+android	Install Android SDK packages	2026-10-31T15:19:03.0957682Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+android	Install Android SDK packages	2026-10-31T15:19:03.0958008Z ##[endgroup]
+android	Install Android SDK packages	2026-10-31T15:19:03.1042271Z Using sdkmanager: /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager
+android	Install Android SDK packages	2026-10-31T15:19:08.7419441Z yes: standard output: Broken pipe
+android	Install Android SDK packages	2026-10-31T15:19:09.4847233Z Loading package information...                                                  
+android	Install Android SDK packages	2026-10-31T15:19:09.5951365Z Loading local repository...                                                     
+android	Install Android SDK packages	2026-10-31T15:19:09.5955346Z [                                       ] 3% Loading local repository...        
+android	Install Android SDK packages	2026-10-31T15:19:09.6064306Z [                                       ] 3% Fetch remote repository...         
+android	Install Android SDK packages	2026-10-31T15:19:09.9268003Z [=                                      ] 3% Fetch remote repository...         
+android	Install Android SDK packages	2026-10-31T15:19:10.0178138Z [=                                      ] 4% Fetch remote repository...         
+android	Install Android SDK packages	2026-10-31T15:19:10.0665761Z [=                                      ] 5% Fetch remote repository...         
+android	Install Android SDK packages	2026-10-31T15:19:10.1220048Z [==                                     ] 5% Fetch remote repository...         
+android	Install Android SDK packages	2026-10-31T15:19:10.2225853Z [==                                     ] 6% Fetch remote repository...         
+android	Install Android SDK packages	2026-10-31T15:19:10.2955350Z [==                                     ] 7% Fetch remote repository...         
+android	Install Android SDK packages	2026-10-31T15:19:10.2964984Z [==                                     ] 7% Computing updates...               
+android	Install Android SDK packages	2026-10-31T15:19:10.3071151Z [===                                    ] 8% Computing updates...               
+android	Install Android SDK packages	2026-10-31T15:19:10.3125680Z [===                                    ] 10% Computing updates...              
+android	Install Android SDK packages	2026-10-31T15:19:10.3135413Z [=======================================] 100% Computing updates...             
+android	Install Android SDK packages	2026-10-31T15:19:10.3135995Z 
+android	Build debug APK	﻿2026-10-31T15:19:10.3629817Z ##[group]Run gradle --no-daemon assembleDebug
+android	Build debug APK	2026-10-31T15:19:10.3630241Z ^[[36;1mgradle --no-daemon assembleDebug^[[0m
+android	Build debug APK	2026-10-31T15:19:10.3644296Z shell: /usr/bin/bash -e {0}
+android	Build debug APK	2026-10-31T15:19:10.3644617Z env:
+android	Build debug APK	2026-10-31T15:19:10.3644972Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+android	Build debug APK	2026-10-31T15:19:10.3645511Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+android	Build debug APK	2026-10-31T15:19:10.3645943Z   MAVEN_ARGS: -ntp
+android	Build debug APK	2026-10-31T15:19:10.3646242Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+android	Build debug APK	2026-10-31T15:19:10.3646590Z   GRADLE_USER_HOME: /home/runner/.gradle
+android	Build debug APK	2026-10-31T15:19:10.3646918Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+android	Build debug APK	2026-10-31T15:19:10.3647260Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+android	Build debug APK	2026-10-31T15:19:10.3647740Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+android	Build debug APK	2026-10-31T15:19:10.3648275Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+android	Build debug APK	2026-10-31T15:19:10.3648640Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+android	Build debug APK	2026-10-31T15:19:10.3648989Z ##[endgroup]
+android	Build debug APK	2026-10-31T15:19:10.9745156Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.7/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+android	Build debug APK	2026-10-31T15:19:12.2710138Z Daemon will be stopped at the end of the build 
+android	Build debug APK	2026-10-31T15:19:18.8756691Z 
+android	Build debug APK	2026-10-31T15:19:18.8774121Z > Configure project :app
+android	Build debug APK	2026-10-31T15:19:18.8777117Z WARNING: The option setting 'android.overridePathCheck=true' is experimental.
+android	Build debug APK	2026-10-31T15:19:18.8778471Z The current default is 'false'.
+android	Build debug APK	2026-10-31T15:19:26.7713417Z Checking the license for package NDK (Side by side) 27.0.12077973 in /usr/local/lib/android/sdk/licenses
+android	Build debug APK	2026-10-31T15:19:26.7721225Z License for package NDK (Side by side) 27.0.12077973 accepted.
+android	Build debug APK	2026-10-31T15:19:26.7722804Z Preparing "Install NDK (Side by side) 27.0.12077973 v.27.0.12077973".
+android	Build debug APK	2026-10-31T15:19:42.9708739Z "Install NDK (Side by side) 27.0.12077973 v.27.0.12077973" ready.
+android	Build debug APK	2026-10-31T15:19:42.9709780Z Installing NDK (Side by side) 27.0.12077973 in /usr/local/lib/android/sdk/ndk/27.0.12077973
+android	Build debug APK	2026-10-31T15:19:42.9710685Z "Install NDK (Side by side) 27.0.12077973 v.27.0.12077973" complete.
+android	Build debug APK	2026-10-31T15:19:43.4710316Z "Install NDK (Side by side) 27.0.12077973 v.27.0.12077973" finished.
+android	Build debug APK	2026-10-31T15:19:44.5715333Z WARNING: We recommend using a newer Android Gradle plugin to use compileSdk = 35
+android	Build debug APK	2026-10-31T15:19:44.5724694Z 
+android	Build debug APK	2026-10-31T15:19:44.5725659Z This Android Gradle plugin (8.5.2) was tested up to compileSdk = 34.
+android	Build debug APK	2026-10-31T15:19:44.5726631Z 
+android	Build debug APK	2026-10-31T15:19:44.5727301Z You are strongly encouraged to update your project to use a newer
+android	Build debug APK	2026-10-31T15:19:44.5728431Z Android Gradle plugin that has been tested with compileSdk = 35.
+android	Build debug APK	2026-10-31T15:19:44.5729156Z 
+android	Build debug APK	2026-10-31T15:19:44.5729697Z If you are already using the latest version of the Android Gradle plugin,
+android	Build debug APK	2026-10-31T15:19:44.5730862Z you may need to wait until a newer version with support for compileSdk = 35 is available.
+android	Build debug APK	2026-10-31T15:19:44.5731683Z 
+android	Build debug APK	2026-10-31T15:19:44.5732141Z For more information refer to the compatibility table:
+android	Build debug APK	2026-10-31T15:19:44.5733019Z https://d.android.com/r/tools/api-level-support
+android	Build debug APK	2026-10-31T15:19:44.5733735Z 
+android	Build debug APK	2026-10-31T15:19:44.5734242Z To suppress this warning, add/update
+android	Build debug APK	2026-10-31T15:19:44.5735027Z     android.suppressUnsupportedCompileSdk=35
+android	Build debug APK	2026-10-31T15:19:44.5735833Z to this project's gradle.properties.
+android	Build debug APK	2026-10-31T15:19:44.9749123Z 
+android	Build debug APK	2026-10-31T15:19:44.9756784Z > Task :app:preBuild UP-TO-DATE
+android	Build debug APK	2026-10-31T15:19:45.0745350Z > Task :app:preDebugBuild UP-TO-DATE
+android	Build debug APK	2026-10-31T15:19:45.0775388Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+android	Build debug APK	2026-10-31T15:19:45.0805223Z > Task :app:checkKotlinGradlePluginConfigurationErrors
+android	Build debug APK	2026-10-31T15:19:45.3735428Z > Task :app:generateDebugResValues
+android	Build debug APK	2026-10-31T15:19:45.3736899Z > Task :app:dataBindingMergeDependencyArtifactsDebug
+android	Build debug APK	2026-10-31T15:19:45.3751026Z > Task :app:generateDebugResources
+android	Build debug APK	2026-10-31T15:19:47.2712511Z > Task :app:packageDebugResources
+android	Build debug APK	2026-10-31T15:19:47.4709452Z > Task :app:mergeDebugResources
+android	Build debug APK	2026-10-31T15:19:47.7725664Z > Task :app:generateDebugBuildConfig
+android	Build debug APK	2026-10-31T15:19:47.8742663Z > Task :app:mapDebugSourceSetPaths
+android	Build debug APK	2026-10-31T15:19:47.8762140Z > Task :app:checkDebugAarMetadata
+android	Build debug APK	2026-10-31T15:19:47.9714729Z > Task :app:createDebugCompatibleScreenManifests
+android	Build debug APK	2026-10-31T15:19:47.9735205Z > Task :app:extractDeepLinksDebug
+android	Build debug APK	2026-10-31T15:19:47.9761900Z > Task :app:parseDebugLocalResources
+android	Build debug APK	2026-10-31T15:19:48.0718887Z > Task :app:processDebugMainManifest
+android	Build debug APK	2026-10-31T15:19:48.2735397Z > Task :app:dataBindingGenBaseClassesDebug
+android	Build debug APK	2026-10-31T15:19:48.3710771Z > Task :app:processDebugManifest
+android	Build debug APK	2026-10-31T15:19:48.3716925Z > Task :app:javaPreCompileDebug
+android	Build debug APK	2026-10-31T15:19:48.4712131Z > Task :app:mergeDebugShaders
+android	Build debug APK	2026-10-31T15:19:48.4735371Z > Task :app:compileDebugShaders NO-SOURCE
+android	Build debug APK	2026-10-31T15:19:48.4758561Z > Task :app:generateDebugAssets UP-TO-DATE
+android	Build debug APK	2026-10-31T15:19:48.4785348Z > Task :app:mergeDebugAssets
+android	Build debug APK	2026-10-31T15:19:48.5709569Z > Task :app:desugarDebugFileDependencies
+android	Build debug APK	2026-10-31T15:19:48.6735347Z > Task :app:compressDebugAssets
+android	Build debug APK	2026-10-31T15:19:48.6736263Z > Task :app:processDebugManifestForPackage
+android	Build debug APK	2026-10-31T15:19:48.7738366Z > Task :app:checkDebugDuplicateClasses
+android	Build debug APK	2026-10-31T15:19:48.7765935Z > Task :app:mergeDebugStartupProfile
+android	Build debug APK	2026-10-31T15:19:48.9729138Z > Task :app:mergeLibDexDebug
+android	Build debug APK	2026-10-31T15:19:49.3735311Z > Task :app:processDebugResources
+android	Build debug APK	2026-10-31T15:19:49.7794722Z 
+android	Build debug APK	2026-10-31T15:19:49.7858006Z > Task :app:configureCMakeDebug[arm64-v8a]
+android	Build debug APK	2026-10-31T15:19:49.7859456Z C/C++: CMake Deprecation Warning at /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android.toolchain.cmake:35 (cmake_minimum_required):
+android	Build debug APK	2026-10-31T15:19:49.7895042Z C/C++:   Compatibility with CMake < 3.10 will be removed from a future version of
+android	Build debug APK	2026-10-31T15:19:49.7953807Z C/C++:   CMake.
+android	Build debug APK	2026-10-31T15:19:49.7986117Z C/C++:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+android	Build debug APK	2026-10-31T15:19:49.8051831Z C/C++:   to tell CMake that the project requires at least <min> but has been updated
+android	Build debug APK	2026-10-31T15:19:49.8075750Z C/C++:   to work with policies introduced by <max> or earlier.
+android	Build debug APK	2026-10-31T15:19:49.8097651Z C/C++: Call Stack (most recent call first):
+android	Build debug APK	2026-10-31T15:19:49.8147292Z C/C++:   /usr/local/share/cmake-3.31/Modules/CMakeDetermineSystem.cmake:146 (include)
+android	Build debug APK	2026-10-31T15:19:49.8209855Z C/C++:   CMakeLists.txt:3 (project)
+android	Build debug APK	2026-10-31T15:19:49.8272635Z C/C++: CMake Deprecation Warning at /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android-legacy.toolchain.cmake:35 (cmake_minimum_required):
+android	Build debug APK	2026-10-31T15:19:49.8315391Z C/C++:   Compatibility with CMake < 3.10 will be removed from a future version of
+android	Build debug APK	2026-10-31T15:19:49.8316001Z C/C++:   CMake.
+android	Build debug APK	2026-10-31T15:19:49.8316410Z C/C++:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+android	Build debug APK	2026-10-31T15:19:49.8317199Z C/C++:   to tell CMake that the project requires at least <min> but has been updated
+android	Build debug APK	2026-10-31T15:19:49.8317943Z C/C++:   to work with policies introduced by <max> or earlier.
+android	Build debug APK	2026-10-31T15:19:49.8318559Z C/C++: Call Stack (most recent call first):
+android	Build debug APK	2026-10-31T15:19:49.8319461Z C/C++:   /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android.toolchain.cmake:55 (include)
+android	Build debug APK	2026-10-31T15:19:49.8320478Z C/C++:   /usr/local/share/cmake-3.31/Modules/CMakeDetermineSystem.cmake:146 (include)
+android	Build debug APK	2026-10-31T15:19:49.8321191Z C/C++:   CMakeLists.txt:3 (project)
+android	Build debug APK	2026-10-31T15:19:49.8322286Z C/C++: CMake Deprecation Warning at /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android.toolchain.cmake:35 (cmake_minimum_required):
+android	Build debug APK	2026-10-31T15:19:49.8323613Z C/C++:   Compatibility with CMake < 3.10 will be removed from a future version of
+android	Build debug APK	2026-10-31T15:19:49.8324502Z C/C++:   CMake.
+android	Build debug APK	2026-10-31T15:19:49.8325126Z C/C++:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+android	Build debug APK	2026-10-31T15:19:49.8326120Z C/C++:   to tell CMake that the project requires at least <min> but has been updated
+android	Build debug APK	2026-10-31T15:19:49.8327407Z C/C++:   to work with policies introduced by <max> or earlier.
+android	Build debug APK	2026-10-31T15:19:49.8328039Z C/C++: Call Stack (most recent call first):
+android	Build debug APK	2026-10-31T15:19:49.8329090Z C/C++:   /home/runner/work/agent-ime/agent-ime/app/.cxx/Debug/e1u01ix0/arm64-v8a/CMakeFiles/3.31.6/CMakeSystem.cmake:6 (include)
+android	Build debug APK	2026-10-31T15:19:49.8330122Z C/C++:   CMakeLists.txt:3 (project)
+android	Build debug APK	2026-10-31T15:19:49.8331255Z C/C++: CMake Deprecation Warning at /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android.toolchain.cmake:35 (cmake_minimum_required):
+android	Build debug APK	2026-10-31T15:19:49.8332571Z C/C++:   Compatibility with CMake < 3.10 will be removed from a future version of
+android	Build debug APK	2026-10-31T15:19:49.8333292Z C/C++:   CMake.
+android	Build debug APK	2026-10-31T15:19:49.8333942Z C/C++:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+android	Build debug APK	2026-10-31T15:19:49.8335093Z C/C++:   to tell CMake that the project requires at least <min> but has been updated
+android	Build debug APK	2026-10-31T15:19:49.8335959Z C/C++:   to work with policies introduced by <max> or earlier.
+android	Build debug APK	2026-10-31T15:19:49.8336583Z C/C++: Call Stack (most recent call first):
+android	Build debug APK	2026-10-31T15:19:49.8337563Z C/C++:   /home/runner/work/agent-ime/agent-ime/app/.cxx/Debug/e1u01ix0/arm64-v8a/CMakeFiles/3.31.6/CMakeSystem.cmake:6 (include)
+android	Build debug APK	2026-10-31T15:19:49.8339117Z C/C++:   /home/runner/work/agent-ime/agent-ime/app/.cxx/Debug/e1u01ix0/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-8RZUoC/CMakeLists.txt:2 (project)
+android	Build debug APK	2026-10-31T15:19:49.8340899Z C/C++: CMake Deprecation Warning at /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android-legacy.toolchain.cmake:35 (cmake_minimum_required):
+android	Build debug APK	2026-10-31T15:19:49.8342286Z C/C++:   Compatibility with CMake < 3.10 will be removed from a future version of
+android	Build debug APK	2026-10-31T15:19:49.8342984Z C/C++:   CMake.
+android	Build debug APK	2026-10-31T15:19:49.8343593Z C/C++:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+android	Build debug APK	2026-10-31T15:19:49.8426570Z C/C++:   to tell CMake that the project requires at least <min> but has been updated
+android	Build debug APK	2026-10-31T15:19:49.8427466Z C/C++:   to work with policies introduced by <max> or earlier.
+android	Build debug APK	2026-10-31T15:19:49.8428178Z C/C++: Call Stack (most recent call first):
+android	Build debug APK	2026-10-31T15:19:49.8429045Z C/C++:   /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android.toolchain.cmake:55 (include)
+android	Build debug APK	2026-10-31T15:19:49.8430356Z C/C++:   /home/runner/work/agent-ime/agent-ime/app/.cxx/Debug/e1u01ix0/arm64-v8a/CMakeFiles/3.31.6/CMakeSystem.cmake:6 (include)
+android	Build debug APK	2026-10-31T15:19:49.8432012Z C/C++:   /home/runner/work/agent-ime/agent-ime/app/.cxx/Debug/e1u01ix0/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-8RZUoC/CMakeLists.txt:2 (project)
+android	Build debug APK	2026-10-31T15:19:51.3724627Z 
+android	Build debug APK	2026-10-31T15:19:51.3775429Z > Task :app:buildCMakeDebug[arm64-v8a]
+android	Build debug APK	2026-10-31T15:19:51.8748799Z 
+android	Build debug APK	2026-10-31T15:19:51.8775197Z > Task :app:configureCMakeDebug[x86_64]
+android	Build debug APK	2026-10-31T15:19:51.8815781Z C/C++: CMake Deprecation Warning at /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android.toolchain.cmake:35 (cmake_minimum_required):
+android	Build debug APK	2026-10-31T15:19:51.8905350Z C/C++:   Compatibility with CMake < 3.10 will be removed from a future version of
+android	Build debug APK	2026-10-31T15:19:51.8934952Z C/C++:   CMake.
+android	Build debug APK	2026-10-31T15:19:51.8995200Z C/C++:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+android	Build debug APK	2026-10-31T15:19:51.9055171Z C/C++:   to tell CMake that the project requires at least <min> but has been updated
+android	Build debug APK	2026-10-31T15:19:51.9075168Z C/C++:   to work with policies introduced by <max> or earlier.
+android	Build debug APK	2026-10-31T15:19:51.9175170Z C/C++: Call Stack (most recent call first):
+android	Build debug APK	2026-10-31T15:19:51.9265600Z C/C++:   /usr/local/share/cmake-3.31/Modules/CMakeDetermineSystem.cmake:146 (include)
+android	Build debug APK	2026-10-31T15:19:51.9325266Z C/C++:   CMakeLists.txt:3 (project)
+android	Build debug APK	2026-10-31T15:19:51.9326544Z C/C++: CMake Deprecation Warning at /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android-legacy.toolchain.cmake:35 (cmake_minimum_required):
+android	Build debug APK	2026-10-31T15:19:51.9328033Z C/C++:   Compatibility with CMake < 3.10 will be removed from a future version of
+android	Build debug APK	2026-10-31T15:19:51.9328824Z C/C++:   CMake.
+android	Build debug APK	2026-10-31T15:19:51.9329504Z C/C++:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+android	Build debug APK	2026-10-31T15:19:51.9331312Z C/C++:   to tell CMake that the project requires at least <min> but has been updated
+android	Build debug APK	2026-10-31T15:19:51.9332281Z C/C++:   to work with policies introduced by <max> or earlier.
+android	Build debug APK	2026-10-31T15:19:51.9332975Z C/C++: Call Stack (most recent call first):
+android	Build debug APK	2026-10-31T15:19:51.9333831Z C/C++:   /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android.toolchain.cmake:55 (include)
+android	Build debug APK	2026-10-31T15:19:51.9335096Z C/C++:   /usr/local/share/cmake-3.31/Modules/CMakeDetermineSystem.cmake:146 (include)
+android	Build debug APK	2026-10-31T15:19:51.9335883Z C/C++:   CMakeLists.txt:3 (project)
+android	Build debug APK	2026-10-31T15:19:51.9337015Z C/C++: CMake Deprecation Warning at /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android.toolchain.cmake:35 (cmake_minimum_required):
+android	Build debug APK	2026-10-31T15:19:51.9338381Z C/C++:   Compatibility with CMake < 3.10 will be removed from a future version of
+android	Build debug APK	2026-10-31T15:19:51.9339140Z C/C++:   CMake.
+android	Build debug APK	2026-10-31T15:19:51.9339811Z C/C++:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+android	Build debug APK	2026-10-31T15:19:51.9340735Z C/C++:   to tell CMake that the project requires at least <min> but has been updated
+android	Build debug APK	2026-10-31T15:19:51.9341624Z C/C++:   to work with policies introduced by <max> or earlier.
+android	Build debug APK	2026-10-31T15:19:51.9342315Z C/C++: Call Stack (most recent call first):
+android	Build debug APK	2026-10-31T15:19:51.9343380Z C/C++:   /home/runner/work/agent-ime/agent-ime/app/.cxx/Debug/e1u01ix0/x86_64/CMakeFiles/3.31.6/CMakeSystem.cmake:6 (include)
+android	Build debug APK	2026-10-31T15:19:51.9344504Z C/C++:   CMakeLists.txt:3 (project)
+android	Build debug APK	2026-10-31T15:19:51.9375936Z C/C++: CMake Deprecation Warning at /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android.toolchain.cmake:35 (cmake_minimum_required):
+android	Build debug APK	2026-10-31T15:19:51.9377492Z C/C++:   Compatibility with CMake < 3.10 will be removed from a future version of
+android	Build debug APK	2026-10-31T15:19:51.9378801Z C/C++:   CMake.
+android	Build debug APK	2026-10-31T15:19:51.9379496Z C/C++:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+android	Build debug APK	2026-10-31T15:19:51.9380556Z C/C++:   to tell CMake that the project requires at least <min> but has been updated
+android	Build debug APK	2026-10-31T15:19:51.9381509Z C/C++:   to work with policies introduced by <max> or earlier.
+android	Build debug APK	2026-10-31T15:19:51.9382243Z C/C++: Call Stack (most recent call first):
+android	Build debug APK	2026-10-31T15:19:51.9383489Z C/C++:   /home/runner/work/agent-ime/agent-ime/app/.cxx/Debug/e1u01ix0/x86_64/CMakeFiles/3.31.6/CMakeSystem.cmake:6 (include)
+android	Build debug APK	2026-10-31T15:19:51.9389246Z C/C++:   /home/runner/work/agent-ime/agent-ime/app/.cxx/Debug/e1u01ix0/x86_64/CMakeFiles/CMakeScratch/TryCompile-Y2J2k2/CMakeLists.txt:2 (project)
+android	Build debug APK	2026-10-31T15:19:51.9415497Z C/C++: CMake Deprecation Warning at /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android-legacy.toolchain.cmake:35 (cmake_minimum_required):
+android	Build debug APK	2026-10-31T15:19:51.9505379Z C/C++:   Compatibility with CMake < 3.10 will be removed from a future version of
+android	Build debug APK	2026-10-31T15:19:51.9565205Z C/C++:   CMake.
+android	Build debug APK	2026-10-31T15:19:51.9595314Z C/C++:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+android	Build debug APK	2026-10-31T15:19:51.9655333Z C/C++:   to tell CMake that the project requires at least <min> but has been updated
+android	Build debug APK	2026-10-31T15:19:51.9715216Z C/C++:   to work with policies introduced by <max> or earlier.
+android	Build debug APK	2026-10-31T15:19:51.9775112Z C/C++: Call Stack (most recent call first):
+android	Build debug APK	2026-10-31T15:19:51.9895604Z C/C++:   /usr/local/lib/android/sdk/ndk/27.0.12077973/build/cmake/android.toolchain.cmake:55 (include)
+android	Build debug APK	2026-10-31T15:19:51.9955554Z C/C++:   /home/runner/work/agent-ime/agent-ime/app/.cxx/Debug/e1u01ix0/x86_64/CMakeFiles/3.31.6/CMakeSystem.cmake:6 (include)
+android	Build debug APK	2026-10-31T15:19:51.9985830Z C/C++:   /home/runner/work/agent-ime/agent-ime/app/.cxx/Debug/e1u01ix0/x86_64/CMakeFiles/CMakeScratch/TryCompile-Y2J2k2/CMakeLists.txt:2 (project)
+android	Build debug APK	2026-10-31T15:19:52.2774548Z 
+android	Build debug APK	2026-10-31T15:19:52.2875166Z > Task :app:buildCMakeDebug[x86_64]
+android	Build debug APK	2026-10-31T15:19:52.3725084Z > Task :app:mergeDebugJniLibFolders
+android	Build debug APK	2026-10-31T15:19:52.6718592Z > Task :app:mergeDebugNativeLibs FAILED
+android	Build debug APK	2026-10-31T15:19:54.8765567Z > Task :app:validateSigningDebug
+android	Build debug APK	2026-10-31T15:19:55.3709594Z > Task :app:mergeExtDexDebug
+android	Build debug APK	2026-10-31T15:20:07.6708051Z 
+android	Build debug APK	2026-10-31T15:20:07.6716464Z > Task :app:compileDebugKotlin
+android	Build debug APK	2026-10-31T15:20:07.6717581Z w: file:///home/runner/work/agent-ime/agent-ime/app/src/main/java/app/agentime/Keypad.kt:154:45 Parameter 'idx' is never used, could be renamed to _
+android	Build debug APK	2026-10-31T15:20:07.6719157Z w: file:///home/runner/work/agent-ime/agent-ime/app/src/main/java/app/agentime/Network.kt:56:44 The corresponding parameter in the supertype 'Callback' is named 'call'. This may cause problems when calling this function with named arguments.
+android	Build debug APK	2026-10-31T15:20:07.6720886Z w: file:///home/runner/work/agent-ime/agent-ime/app/src/main/java/app/agentime/Network.kt:69:45 The corresponding parameter in the supertype 'Callback' is named 'call'. This may cause problems when calling this function with named arguments.
+android	Build debug APK	2026-10-31T15:20:07.6722573Z w: file:///home/runner/work/agent-ime/agent-ime/app/src/main/java/app/agentime/Network.kt:69:54 The corresponding parameter in the supertype 'Callback' is named 'response'. This may cause problems when calling this function with named arguments.
+android	Build debug APK	2026-10-31T15:20:07.7743351Z 
+android	Build debug APK	2026-10-31T15:20:07.7744792Z gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1793459954471.json
+android	Build debug APK	2026-10-31T15:20:07.7751763Z FAILURE: Build failed with an exception.
+android	Build debug APK	2026-10-31T15:20:07.7774413Z 
+android	Build debug APK	2026-10-31T15:20:07.7776243Z * What went wrong:
+android	Build debug APK	2026-10-31T15:20:07.7777112Z Execution failed for task ':app:mergeDebugNativeLibs'.
+android	Build debug APK	2026-10-31T15:20:07.7778519Z > A failure occurred while executing com.android.build.gradle.internal.tasks.MergeNativeLibsTask$MergeNativeLibsTaskWorkAction
+android	Build debug APK	2026-10-31T15:20:07.7791261Z    > 2 files found with path 'lib/arm64-v8a/libc++_shared.so' from inputs:
+android	Build debug APK	2026-10-31T15:20:07.7799439Z       - /home/runner/work/agent-ime/agent-ime/app/build/intermediates/merged_jni_libs/debug/mergeDebugJniLibFolders/out/arm64-v8a/libc++_shared.so
+android	Build debug APK	2026-10-31T15:20:07.7801769Z       - /home/runner/work/agent-ime/agent-ime/app/build/intermediates/cxx/Debug/e1u01ix0/obj/arm64-v8a/libc++_shared.so
+android	Build debug APK	2026-10-31T15:20:07.7805351Z      If you are using jniLibs and CMake IMPORTED targets, see
+android	Build debug APK	2026-10-31T15:20:07.7806403Z      https://developer.android.com/r/tools/jniLibs-vs-imported-targets
+android	Build debug APK	2026-10-31T15:20:07.7806997Z 
+android	Build debug APK	2026-10-31T15:20:07.7807191Z * Try:
+android	Build debug APK	2026-10-31T15:20:07.7807580Z > Run with --stacktrace option to get the stack trace.
+android	Build debug APK	2026-10-31T15:20:07.7808091Z > Run with --info or --debug option to get more log output.
+android	Build debug APK	2026-10-31T15:20:07.7808559Z > Run with --scan to get full insights.
+android	Build debug APK	2026-10-31T15:20:07.7809010Z > Get more help at https://help.gradle.org.
+android	Build debug APK	2026-10-31T15:20:07.7809330Z 
+android	Build debug APK	2026-10-31T15:20:07.7809522Z BUILD FAILED in 57s
+android	Build debug APK	2026-10-31T15:20:07.8709803Z 34 actionable tasks: 34 executed
+android	Build debug APK	2026-10-31T15:20:08.2793676Z ##[error]Process completed with exit code 1.
+android	Post Set up Gradle	﻿2026-10-31T15:20:08.2998711Z Post job cleanup.
+android	Post Set up Gradle	2026-10-31T15:20:08.5522196Z In post-action step
+android	Post Set up Gradle	2026-10-31T15:20:08.5535879Z ##[group]Stopping Gradle daemons
+android	Post Set up Gradle	2026-10-31T15:20:08.5537036Z Stopping Gradle daemons for /home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-8.7
+android	Post Set up Gradle	2026-10-31T15:20:08.5552340Z [command]/home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-8.7/bin/gradle --stop
+android	Post Set up Gradle	2026-10-31T15:20:09.4764702Z No Gradle daemons are running.
+android	Post Set up Gradle	2026-10-31T15:20:09.4864600Z ##[endgroup]
+android	Post Set up Gradle	2026-10-31T15:20:09.4888565Z Not performing cache-cleanup due to build failure
+android	Post Set up Gradle	2026-10-31T15:20:09.4889804Z ##[group]Caching Gradle state
+android	Post Set up Gradle	2026-10-31T15:20:09.7426010Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/agent-ime/agent-ime --files-from manifest.txt --use-compress-program zstdmt
+android	Post Set up Gradle	2026-10-31T15:20:10.1160993Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/agent-ime/agent-ime --files-from manifest.txt --use-compress-program zstdmt
+android	Post Set up Gradle	2026-10-31T15:20:10.4035415Z Sent 108907 of 108907 (100.0%), 0.3 MBs/sec
+android	Post Set up Gradle	2026-10-31T15:20:10.6434630Z Saved cache entry with key gradle-kotlin-dsl-v1-3d9ea068f905c0ebe4fffa62448e9f14 from /home/runner/.gradle/caches/*/kotlin-dsl/accessors/*/,/home/runner/.gradle/caches/*/kotlin-dsl/scripts/*/ in 948ms
+android	Post Set up Gradle	2026-10-31T15:20:12.4055106Z Sent 39845888 of 109625945 (36.3%), 38.0 MBs/sec
+android	Post Set up Gradle	2026-10-31T15:20:13.4057711Z Sent 104726528 of 109625945 (95.5%), 49.9 MBs/sec
+android	Post Set up Gradle	2026-10-31T15:20:13.8931566Z Sent 109625945 of 109625945 (100.0%), 42.0 MBs/sec
+android	Post Set up Gradle	2026-10-31T15:20:14.1143531Z Saved cache entry with key gradle-transforms-v1-c2663c4b7f7d2bf55dc5d8c78073ab76 from /home/runner/.gradle/caches/transforms-4/*/,/home/runner/.gradle/caches/*/transforms/*/ in 4217ms
+android	Post Set up Gradle	2026-10-31T15:20:14.4260913Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/agent-ime/agent-ime --files-from manifest.txt --use-compress-program zstdmt
+android	Post Set up Gradle	2026-10-31T15:20:15.3127092Z Sent 1706344 of 1706344 (100.0%), 2.6 MBs/sec
+android	Post Set up Gradle	2026-10-31T15:20:15.5198924Z Saved cache entry with key gradle-home-v1|Linux-X64|android[751e3a27013e646c8eb8af27bfacc3ef]-39b8825c5fd7f407615066b5b8aadd11502907e9 from /home/runner/.gradle/caches,/home/runner/.gradle/notifications,/home/runner/.gradle/.setup-gradle in 1107ms
+android	Post Set up Gradle	2026-10-31T15:20:15.5201479Z ##[endgroup]
+android	Post Set up Gradle	2026-10-31T15:20:15.5209654Z Generating Job Summary
+android	Post Set up Gradle	2026-10-31T15:20:15.5227058Z Completed post-action step
+android	Post Set up JDK 17	﻿2026-10-31T15:20:15.5442312Z Post job cleanup.
+android	Post Checkout	﻿2026-10-31T15:20:15.6922070Z Post job cleanup.
+android	Post Checkout	2026-10-31T15:20:15.7952669Z [command]/usr/bin/git version
+android	Post Checkout	2026-10-31T15:20:15.8005084Z git version 2.56.0
+android	Post Checkout	2026-10-31T15:20:15.8052469Z Temporarily overriding HOME='/home/runner/work/_temp/1749e633-e8a7-403d-adda-d9db5f59952a' before making global git config changes
+android	Post Checkout	2026-10-31T15:20:15.8054106Z Adding repository directory to the temporary git global config as a safe directory
+android	Post Checkout	2026-10-31T15:20:15.8059640Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agent-ime/agent-ime
+android	Post Checkout	2026-10-31T15:20:15.8109308Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+android	Post Checkout	2026-10-31T15:20:15.8148135Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+android	Post Checkout	2026-10-31T15:20:15.8368960Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+android	Post Checkout	2026-10-31T15:20:15.8407137Z http.https://github.com/.extraheader
+android	Post Checkout	2026-10-31T15:20:15.8435427Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+android	Post Checkout	2026-10-31T15:20:15.8466616Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+android	Post Checkout	2026-10-31T15:20:15.8700319Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+android	Post Checkout	2026-10-31T15:20:15.8738605Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+android	Complete job	﻿2026-10-31T15:20:15.9105231Z Cleaning up orphan processes
+android	Complete job	2026-10-31T15:20:15.9444806Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, gradle/actions/setup-gradle@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

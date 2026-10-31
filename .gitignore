@@ -16,3 +16,10 @@ keystore.properties
 release.properties
 *.jks.base64
 *.keystore.b64
+
+# 验收原始证据（截图/控件树/构建日志/APK）不入库，仅本地保留
+docs/acceptance-evidence/*.png
+docs/acceptance-evidence/*.xml
+docs/acceptance-evidence/*.apk
+docs/acceptance-evidence/*.log
+docs/acceptance-evidence/*.txt
