@@ -2,6 +2,8 @@
 .idea/
 local.properties
 **/build/
+# CMake/NDK intermediate output (AGP externalNativeBuild)
+.cxx/
 __pycache__/
 *.py[cod]
 .env
@@ -9,3 +11,8 @@ __pycache__/
 !.env.example
 *.jks
 *.keystore
+# release signing material: never commit (see docs/release-signing.md)
+keystore.properties
+release.properties
+*.jks.base64
+*.keystore.b64
