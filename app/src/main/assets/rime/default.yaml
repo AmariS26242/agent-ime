@@ -1,0 +1,14 @@
+# Rime default configuration (AgentIme bundled data)
+# encoding: utf-8
+#
+# Intentionally minimal: AgentIme ships only the luna_pinyin (朙月拼音) schema,
+# so no preset key bindings / punctuation / symbol presets are imported.
+# Provenance and licenses: assets/licenses/NOTICE.md
+
+config_version: "0.40"
+
+schema_list:
+  - schema: luna_pinyin
+
+menu:
+  page_size: 9

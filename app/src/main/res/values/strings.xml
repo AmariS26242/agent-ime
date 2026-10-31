@@ -4,11 +4,13 @@
     <string name="ime_name">Agent 输入法</string>
 
     <string name="toolbar_agent">Agent</string>
+    <string name="toolbar_nine_key">九键</string>
+    <string name="toolbar_qwerty">26键</string>
     <string name="toolbar_normal">普通输入</string>
-    <string name="toolbar_back_to_normal">← 返回普通输入</string>
+    <string name="toolbar_back_to_normal">返回普通输入</string>
     <string name="toolbar_ask">问 Agent</string>
     <string name="toolbar_rewrite">帮我改</string>
-    <string name="toolbar_session">会话…</string>
+    <string name="toolbar_session">会话</string>
 
     <string name="hint_ask">输入你的问题，只发送到 Agent</string>
     <string name="hint_followup">继续追问…</string>

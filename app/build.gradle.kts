@@ -6,6 +6,7 @@ plugins {
 android {
     namespace = "app.agentime"
     compileSdk = 35
+    ndkVersion = "27.0.12077973"
 
     defaultConfig {
         applicationId = "app.agentime"
@@ -15,6 +16,35 @@ android {
         versionName = "0.1.0"
         // Backend base URL is configurable; no secrets here. Use cleartext only for local dev.
         buildConfigField("String", "DEFAULT_BACKEND", "\"http://10.0.2.2:8787\"")
+
+        // librime + the whole native dependency closure is vendored per ABI in
+        // src/main/jniLibs; keep the set explicit so a stale .so cannot leak in.
+        ndk {
+            abiFilters.addAll(listOf("arm64-v8a", "x86_64"))
+        }
+        externalNativeBuild {
+            cmake {
+                arguments += listOf("-DANDROID_STL=c++_shared")
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            // 3.31.6 (SDK package) is required: CMake 3.22.1 crashes with
+            // STATUS_STACK_BUFFER_OVERRUN when the project path contains
+            // non-ASCII characters (e.g. "agent输入法").
+            version = "3.31.6"
+        }
+    }
+
+    packaging {
+        // librime's .so files are prebuilt and must be shipped verbatim;
+        // legacy packaging keeps them uncompressed and directly mmap-able.
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 
     buildFeatures {

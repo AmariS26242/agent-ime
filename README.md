@@ -80,9 +80,11 @@ python3 -m unittest discover -s tests -v
 
 ## 中文拼音输入
 
-**未集成任何成熟中文输入引擎。** `app/src/main/java/app/agentime/PinyinDictionary.kt` 是一个**明确标注的离线有限词典 POC**：硬编码数十条拼音-候选，仅演示“键入拼音后选候选”。“全量中文输入”的验收 **PENDING**。
+当前已选定 **Rime/librime 作为后续成熟引擎集成方向**：librime 核心采用 3-Clause BSD，支持可配置输入方案，适合在当前 `InputMethodService` 中通过 NDK 嵌入并定义九键方案。词库和方案文件仍需单独核对许可证，不能把引擎许可证当成词库许可证。
 
-选型要求（提交给 Codex 审查）：许可证、词库许可证、离线能力、集成成本。可选方向（不构成推荐，未做评估）：Rime（`librime`，需自备词库并核对许可）、fcitx5 词库、Sogou/Baidu 词库（多数许可受限）。**不要将它们作为现有依赖声明**：本仓库未包含它们。
+当前代码的默认引擎已经切换到 `RimeChineseInputEngine`。它通过 `rime_jni` 接入 librime；如果 APK 尚未打包对应 ABI，会自动退回 `PinyinDictionary.kt` 的离线有限词典，保证开发包仍能启动。普通键盘和 Agent 提问面板都已加入“九键/26键”切换；真正的全量中文输入验收仍需在打入 librime native 产物后完成。
+
+Fcitx5 Android 作为备选参考：它已有中文拼音和双拼引擎，但工程本身是完整输入法应用，键盘布局定制和九宫格仍有上游待完善项，因此暂不作为当前应用的嵌入方案。
 
 ## 已知限制（如实）
 

@@ -1,0 +1,60 @@
+# Rime schema: 朙月拼音 (luna_pinyin), trimmed for AgentIme
+# encoding: utf-8
+#
+# Derived from rime-luna-pinyin luna_pinyin.schema.yaml (LGPL-3.0).
+# Changes vs upstream:
+#   * removed the opencc simplifier filters (zh_hans / zh_hant_hk / zh_hant_tw)
+#     because AgentIme does not bundle opencc dictionaries;
+#   * removed the stroke reverse_lookup translator and the "stroke" dependency;
+#   * removed the grammar __patch and the pinyin:/abbreviation __patch (the
+#     pinyin.yaml preset is not bundled);
+#   * removed the custom_phrase translator and the key_binder / recognizer /
+#     punctuator preset imports.
+# Only the plain pinyin pipeline remains.
+
+schema:
+  schema_id: luna_pinyin
+  name: 朙月拼音
+  version: '0.31-agentime1'
+  author:
+    - 佛振 <chen.sst@gmail.com>
+  description: |
+    Rime 預設的拼音輸入方案（AgentIme 精簡版）。
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 西文 ]
+    abbrev: [ 中, Ａ ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+  - name: ascii_punct
+    states: [ 。，, ．， ]
+
+engine:
+  processors:
+    - ascii_composer
+    - speller
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - abc_segmentor
+    - fallback_segmentor
+  translators:
+    - script_translator
+  filters:
+    - uniquifier
+
+speller:
+  alphabet: zyxwvutsrqponmlkjihgfedcba
+  delimiter: " '"
+
+translator:
+  dictionary: luna_pinyin
+  enable_user_dict: true
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/

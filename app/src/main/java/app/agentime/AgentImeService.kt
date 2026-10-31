@@ -29,6 +29,7 @@ class AgentImeService : InputMethodService() {
 
     private lateinit var session: AgentSession
     private lateinit var store: EndpointStore
+    private val chineseInputEngine: ChineseInputEngine = ChineseInputEngines.createDefault()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var job: Job? = null
 
@@ -40,7 +41,12 @@ class AgentImeService : InputMethodService() {
     private var agentVisible: Boolean = false
 
     private var pinyinBuffer: String = ""
+    private var nineKeyMode: Boolean = false
+    private var nineKeyBuffer: String = ""
     private var candidateContainer: LinearLayout? = null
+    private var agentCandidateContainer: LinearLayout? = null
+    private var rebuildAgentKeypad: (() -> Unit)? = null
+    private var clearAgentComposition: (() -> Unit)? = null
 
     private var editorInfo: EditorInfo? = null
     private var hostPackage: String = ""
@@ -56,6 +62,7 @@ class AgentImeService : InputMethodService() {
         super.onCreate()
         session = AgentSession()
         store = EndpointStore(this)
+        chineseInputEngine.prepare(applicationContext)
     }
 
     override fun onDestroy() {
@@ -81,9 +88,32 @@ override fun onCreateInputView(): View {
     wireAgent(agent)
     applyMode()
 
+    // The IME window is laid out edge-to-edge down to the bottom of the screen
+    // and the navigation bar is drawn on top of it. On the very first show the
+    // first window measure can happen before navigation-bar insets are
+    // dispatched (the first dispatch can even report 0), which used to lock the
+    // window height to the unpadded keyboard and clip the bottom row behind the
+    // navigation bar. Read the navigation-bar overlap synchronously from the
+    // window metrics so the very first measure already reserves that space.
+    val initialNavBottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        getSystemService(WindowManager::class.java)
+            .currentWindowMetrics
+            .windowInsets
+            .getInsets(android.view.WindowInsets.Type.navigationBars())
+            .bottom
+    } else {
+        0
+    }
+    container.setPadding(0, 0, 0, initialNavBottom)
+
     androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(container) { v, insets ->
         val navBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.navigationBars())
-        v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
+        // Skip the transient pre-layout dispatch that reports 0 before the real
+        // navigation-bar insets arrive; after layout the reported value is the
+        // authoritative overlap (also covers rotation / navigation-mode changes).
+        if (navBars.bottom > 0 || v.isLaidOut) {
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, navBars.bottom)
+        }
         insets
     }
     androidx.core.view.ViewCompat.requestApplyInsets(container)
@@ -123,6 +153,12 @@ override fun onCreateInputView(): View {
             toast(getString(R.string.label_expired_toast))
         }
         session.touch()
+        // Rebuild both keypad variants for the current editor type. This keeps
+        // sensitive fields direct-input even after a view restart, while making
+        // candidates recover when returning to an ordinary editor.
+        clearCompositionUi()
+        rootNormal?.let { renderNormalKeypad(it) }
+        rebuildAgentKeypad?.invoke()
         // Default to the normal keyboard view for a fresh editor; preserve the
         // currently visible agent pane when the same editor restarts.
         if (!(restarting && agentVisible)) {
@@ -215,6 +251,16 @@ override fun onCreateInputView(): View {
         return false
     }
 
+    private fun clearCompositionUi() {
+        pinyinBuffer = ""
+        nineKeyBuffer = ""
+        candidateContainer?.removeAllViews()
+        candidateContainer?.visibility = View.GONE
+        clearAgentComposition?.invoke()
+        agentCandidateContainer?.removeAllViews()
+        agentCandidateContainer?.visibility = View.GONE
+    }
+
     private fun wireNormal(view: View) {
         view.findViewById<Button>(R.id.btnAgent).setOnClickListener {
             if (session.expired()) {
@@ -224,24 +270,103 @@ override fun onCreateInputView(): View {
             session.mode = AgentSession.Mode.ASK
             session.touch()
             agentVisible = true
+            // Re-evaluate sensitive direct-input mode when entering Agent.
+            rebuildAgentKeypad?.invoke()
             applyMode()
         }
         pinyinBuffer = ""
-        val rows = normalRows(view)
+        nineKeyBuffer = ""
         candidateContainer = createCandidateRow(view as LinearLayout)
+        view.findViewById<Button>(R.id.btnNineKey).setOnClickListener {
+            // A sensitive editor is always direct-input: no nine-key buffer,
+            // no candidates, no composition state to leak or lose.
+            if (hostSensitive) {
+                nineKeyMode = false
+                nineKeyBuffer = ""
+                pinyinBuffer = ""
+                view.findViewById<Button>(R.id.btnNineKey).setText(R.string.toolbar_nine_key)
+                renderNormalKeypad(view)
+                return@setOnClickListener
+            }
+            nineKeyMode = !nineKeyMode
+            pinyinBuffer = ""
+            nineKeyBuffer = ""
+            candidateContainer?.visibility = View.GONE
+            view.findViewById<Button>(R.id.btnNineKey).setText(
+                if (nineKeyMode) R.string.toolbar_qwerty else R.string.toolbar_nine_key
+            )
+            renderNormalKeypad(view)
+        }
+        renderNormalKeypad(view)
+    }
+
+    private fun renderNormalKeypad(view: View) {
+        val rows = normalRows(view)
+        // Sensitive fields never compose: force the direct-input keypad,
+        // drop any stale pinyin/nine-key buffers, and reset the toggle label.
+        if (hostSensitive) {
+            nineKeyMode = false
+            pinyinBuffer = ""
+            nineKeyBuffer = ""
+            view.findViewById<Button>(R.id.btnNineKey).setText(R.string.toolbar_nine_key)
+        }
         val keypad = Keypad(
             this,
             onChar = { commitChar(it) },
-            onBackspace = { deleteOne() },
-            onSpace = { commitChar(' ') },
-            onEnter = { commitEnter() },
+            onBackspace = {
+                if (nineKeyMode && nineKeyBuffer.isNotEmpty()) {
+                    nineKeyBuffer = nineKeyBuffer.dropLast(1)
+                    refreshNineCandidates(rows, view as LinearLayout)
+                } else if (!nineKeyMode && pinyinBuffer.isNotEmpty()) {
+                    // While composing pinyin the backspace belongs to the
+                    // composition, not to the host text field.
+                    pinyinBuffer = pinyinBuffer.dropLast(1)
+                    refreshCandidates(rows, view as LinearLayout)
+                } else {
+                    deleteOne()
+                }
+            },
+            onSpace = {
+                if (nineKeyMode) commitNineKeyBuffer()
+                commitChar(' ')
+            },
+            onEnter = {
+                if (nineKeyMode) commitNineKeyBuffer()
+                else if (pinyinBuffer.isNotEmpty()) commitPinyinBuffer()
+                else commitEnter()
+            },
             onPinyinDone = { commitPinyinBuffer() },
-            onPinyinCancel = { pinyinBuffer = ""; refreshCandidates(rows, view as LinearLayout) }
+            onPinyinCancel = {
+                if (nineKeyMode) {
+                    nineKeyMode = false
+                    nineKeyBuffer = ""
+                    view.findViewById<Button>(R.id.btnNineKey).setText(R.string.toolbar_nine_key)
+                    renderNormalKeypad(view)
+                } else {
+                    pinyinBuffer = ""
+                    refreshCandidates(rows, view as LinearLayout)
+                }
+            }
         )
-        keypad.buildQwerty(rows) { letter ->
-            if (letter.length == 1) {
-                pinyinBuffer += letter
-                refreshCandidates(rows, view as LinearLayout)
+        if (nineKeyMode) {
+            keypad.buildNineKey(
+                rows,
+                onDigit = { digit ->
+                    nineKeyBuffer += digit
+                    refreshNineCandidates(rows, view as LinearLayout)
+                },
+                onZero = {
+                    if (nineKeyBuffer.isNotEmpty()) commitNineKeyBuffer() else commitChar(' ')
+                }
+            )
+        } else if (hostSensitive) {
+            keypad.buildDirect(rows) { c -> commitChar(c) }
+        } else {
+            keypad.buildQwerty(rows) { letter ->
+                if (letter.length == 1) {
+                    pinyinBuffer += letter
+                    refreshCandidates(rows, view as LinearLayout)
+                }
             }
         }
     }
@@ -267,7 +392,11 @@ override fun onCreateInputView(): View {
     }
 
     private fun refreshCandidates(rows: List<LinearLayout>, parent: LinearLayout) {
-        val candidates = PinyinDictionary.candidates(pinyinBuffer)
+        if (hostSensitive) {
+            clearCompositionUi()
+            return
+        }
+        val candidates = chineseInputEngine.pinyinCandidates(pinyinBuffer)
         val container = candidateContainer ?: return
         val keypad = Keypad(
             this,
@@ -285,9 +414,43 @@ override fun onCreateInputView(): View {
         }
     }
 
+    private fun refreshNineCandidates(rows: List<LinearLayout>, parent: LinearLayout) {
+        if (hostSensitive) {
+            clearCompositionUi()
+            return
+        }
+        val container = candidateContainer ?: return
+        val keypad = Keypad(
+            this,
+            onChar = { commitChar(it) },
+            onBackspace = { deleteOne() },
+            onSpace = { commitChar(' ') },
+            onEnter = { commitEnter() },
+            onPinyinDone = { commitNineKeyBuffer() },
+            onPinyinCancel = {
+                nineKeyBuffer = ""
+                refreshNineCandidates(rows, parent)
+            }
+        )
+        keypad.showCandidates(container, chineseInputEngine.t9Candidates(nineKeyBuffer)) { picked ->
+            nineKeyBuffer = ""
+            commitString(picked)
+            refreshNineCandidates(rows, parent)
+        }
+    }
+
+    private fun commitNineKeyBuffer() {
+        if (nineKeyBuffer.isBlank()) return
+        val candidates = chineseInputEngine.t9Candidates(nineKeyBuffer)
+        commitString(candidates.firstOrNull() ?: nineKeyBuffer)
+        nineKeyBuffer = ""
+        val root = rootNormal as? LinearLayout ?: return
+        refreshNineCandidates(normalRows(root), root)
+    }
+
     private fun commitPinyinBuffer() {
         if (pinyinBuffer.isBlank()) return
-        val converted = PinyinDictionary.convertFully(pinyinBuffer)
+        val converted = chineseInputEngine.commitPinyin(pinyinBuffer)
         if (converted != null) commitString(converted) else commitString(pinyinBuffer)
         pinyinBuffer = ""
         val root = rootNormal as? LinearLayout ?: return
@@ -443,14 +606,30 @@ val rows = listOf(
     view.findViewById<LinearLayout>(R.id.rowAskBottom)
 )
 var askPinyin = ""
+var askNineKey = false
+var askNineBuffer = ""
 val askCandidateRow = LinearLayout(this).apply {
     orientation = LinearLayout.HORIZONTAL
     gravity = android.view.Gravity.CENTER_VERTICAL
     visibility = View.GONE
 }
+agentCandidateContainer = askCandidateRow
 val askCaption = TextView(this).apply {
-    text = "有限拼音词表·技术验证"
+    fun engineCaption(): String {
+        val rime = chineseInputEngine as? RimeChineseInputEngine
+        return if (rime != null && rime.isNativeRimeReady) {
+            "librime ${rime.nativeRimeVersion ?: ""} · 朙月拼音"
+        } else {
+            "内置拼音词表·回退模式"
+        }
+    }
+    text = engineCaption()
+    // librime deployment is asynchronous; refresh once it reports ready.
+    view.postDelayed({ text = engineCaption() }, 1500)
+    view.postDelayed({ text = engineCaption() }, 5000)
     textSize = 11f
+    maxLines = 1
+    ellipsize = TextUtils.TruncateAt.END
     setTextColor(android.graphics.Color.parseColor("#667085"))
     gravity = android.view.Gravity.CENTER
     setPadding(8, 4, 8, 4)
@@ -459,85 +638,164 @@ val askParent = view.findViewById<LinearLayout>(R.id.askKeypad)
 if (askCaption.parent == null) askParent.addView(askCaption, 0)
 if (askCandidateRow.parent == null) askParent.addView(askCandidateRow, 1)
 var keypad: Keypad? = null
-fun refreshAskCandidates() {
-    val kp = keypad ?: return
-    kp.showCandidates(askCandidateRow, PinyinDictionary.candidates(askPinyin)) { picked ->
-        edit.text.append(picked)
+fun commitAskComposition() {
+    if (askNineKey) {
+        if (askNineBuffer.isNotEmpty()) {
+            val cands = chineseInputEngine.t9Candidates(askNineBuffer)
+            edit.text.append(cands.firstOrNull() ?: askNineBuffer)
+            askNineBuffer = ""
+        }
+    } else if (askPinyin.isNotEmpty()) {
+        val cands = chineseInputEngine.pinyinCandidates(askPinyin)
+        edit.text.append(cands.firstOrNull() ?: askPinyin)
         askPinyin = ""
+    }
+}
+fun refreshAskCandidates() {
+     if (hostSensitive) {
+         askCandidateRow.removeAllViews()
+         askCandidateRow.visibility = View.GONE
+         return
+     }
+    val kp = keypad ?: return
+    val candidates = if (askNineKey) {
+        chineseInputEngine.t9Candidates(askNineBuffer)
+    } else {
+        chineseInputEngine.pinyinCandidates(askPinyin)
+    }
+    kp.showCandidates(askCandidateRow, candidates) { picked ->
+        edit.text.append(picked)
+        if (askNineKey) askNineBuffer = "" else askPinyin = ""
         refreshAskCandidates()
     }
-    if (askPinyin.isBlank()) {
+    val compositionBlank = if (askNineKey) askNineBuffer.isBlank() else askPinyin.isBlank()
+    if (compositionBlank) {
         askCandidateRow.visibility = View.GONE
-    } else if (PinyinDictionary.candidates(askPinyin).isNotEmpty()) {
+    } else if (candidates.isNotEmpty()) {
         askCandidateRow.visibility = View.VISIBLE
     } else {
         askCandidateRow.visibility = View.GONE
     }
 }
-keypad = Keypad(
-    this,
-    onChar = { c ->
-        edit.text.append(c)
+fun rebuildAskKeypad() {
+    // A sensitive host also keeps the internal draft on plain direct input:
+    // nothing is held in a pinyin/nine-key buffer that could be silently lost
+    // while the candidate row is suppressed.
+    if (hostSensitive) {
+        askNineKey = false
         askPinyin = ""
-        refreshAskCandidates()
-    },
-    onBackspace = {
-        if (askPinyin.isNotEmpty()) {
-            askPinyin = askPinyin.dropLast(1)
-        } else {
-            val cur = edit.text
-            if (cur.length > 0) cur.delete(cur.length - 1, cur.length)
-        }
-        refreshAskCandidates()
-    },
-    onSpace = {
-        if (askPinyin.isNotEmpty()) {
-            val cands = PinyinDictionary.candidates(askPinyin)
-            if (cands.isNotEmpty()) {
-                edit.text.append(cands.first())
-            } else {
-                edit.text.append(askPinyin)
-            }
-            askPinyin = ""
-        }
-        edit.text.append(' ')
-        refreshAskCandidates()
-    },
-    onEnter = {
-        if (askPinyin.isNotEmpty()) {
-            val cands = PinyinDictionary.candidates(askPinyin)
-            if (cands.isNotEmpty()) {
-                edit.text.append(cands.first())
-            } else {
-                edit.text.append(askPinyin)
-            }
-            askPinyin = ""
-        }
-        edit.text.append('\n')
-        refreshAskCandidates()
-    },
-    onPinyinDone = {
-        if (askPinyin.isNotEmpty()) {
-            val cands = PinyinDictionary.candidates(askPinyin)
-            if (cands.isNotEmpty()) {
-                edit.text.append(cands.first())
-            } else {
-                edit.text.append(askPinyin)
-            }
-            askPinyin = ""
-        }
-        refreshAskCandidates()
-    },
-    onPinyinCancel = {
-        askPinyin = ""
-        refreshAskCandidates()
+        askNineBuffer = ""
     }
-)
-keypad.buildQwerty(rows) { pinyinChar ->
-    askPinyin += pinyinChar
+    // The engine caption is status, not a candidate row: it must stay visible
+    // even in a sensitive host where only the candidate row is suppressed.
+    askCaption.visibility = View.VISIBLE
+    keypad = Keypad(
+        this,
+        onChar = { c ->
+            edit.text.append(c)
+            askPinyin = ""
+            askNineBuffer = ""
+            refreshAskCandidates()
+        },
+        onBackspace = {
+            when {
+                askNineKey && askNineBuffer.isNotEmpty() -> askNineBuffer = askNineBuffer.dropLast(1)
+                !askNineKey && askPinyin.isNotEmpty() -> askPinyin = askPinyin.dropLast(1)
+                else -> {
+                    val cur = edit.text
+                    if (cur.length > 0) cur.delete(cur.length - 1, cur.length)
+                }
+            }
+            refreshAskCandidates()
+        },
+        onSpace = {
+            commitAskComposition()
+            edit.text.append(' ')
+            refreshAskCandidates()
+        },
+        onEnter = {
+            commitAskComposition()
+            edit.text.append('\n')
+            refreshAskCandidates()
+        },
+        onPinyinDone = {
+            commitAskComposition()
+            refreshAskCandidates()
+        },
+        onPinyinCancel = {
+            if (askNineKey) {
+                askNineKey = false
+                askNineBuffer = ""
+                view.findViewById<Button>(R.id.btnNineKeyAgent).setText(R.string.toolbar_nine_key)
+                rebuildAskKeypad()
+            } else {
+                askPinyin = ""
+                refreshAskCandidates()
+            }
+        }
+    )
+    if (askNineKey) {
+        keypad?.buildNineKey(
+            rows,
+            onDigit = { digit ->
+                askNineBuffer += digit
+                refreshAskCandidates()
+            },
+            onZero = {
+                if (askNineBuffer.isNotEmpty()) commitAskComposition() else edit.text.append(' ')
+                refreshAskCandidates()
+            }
+        )
+    } else if (hostSensitive) {
+        // Internal draft in a sensitive host: plain characters only, so
+        // nothing is buffered while the candidate row is hidden.
+        keypad?.buildDirect(rows) { c ->
+            edit.text.append(c)
+            askPinyin = ""
+            askNineBuffer = ""
+            refreshAskCandidates()
+        }
+    } else {
+        keypad?.buildQwerty(rows) { pinyinChar ->
+            askPinyin += pinyinChar
+            refreshAskCandidates()
+        }
+    }
     refreshAskCandidates()
 }
+view.findViewById<Button>(R.id.btnNineKeyAgent).setOnClickListener {
+    // No nine-key toggle while the host is sensitive: keep the draft on
+    // direct input instead of collecting an invisible digit buffer.
+    if (hostSensitive) {
+        askNineKey = false
+        askNineBuffer = ""
+        askPinyin = ""
+        view.findViewById<Button>(R.id.btnNineKeyAgent).setText(R.string.toolbar_nine_key)
+        rebuildAskKeypad()
+        return@setOnClickListener
     }
+    askNineKey = !askNineKey
+    askPinyin = ""
+    askNineBuffer = ""
+    view.findViewById<Button>(R.id.btnNineKeyAgent).setText(
+        if (askNineKey) R.string.toolbar_qwerty else R.string.toolbar_nine_key
+    )
+    rebuildAskKeypad()
+}
+    // Expose the local rebuild/reset routines before the initial keypad build,
+    // so onStartInputView can rebuild or clear the agent composition whenever
+    // the host editor changes and no stale pinyin / nine-key buffer survives.
+    rebuildAgentKeypad = { rebuildAskKeypad() }
+    clearAgentComposition = {
+        askPinyin = ""
+        askNineBuffer = ""
+        askNineKey = false
+        askCandidateRow.removeAllViews()
+        askCandidateRow.visibility = View.GONE
+        view.findViewById<Button>(R.id.btnNineKeyAgent).setText(R.string.toolbar_nine_key)
+    }
+    rebuildAskKeypad()
+}
 
     private fun sendAsk(question: String) {
         if (session.expired()) {

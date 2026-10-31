@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ordinary keyboard.  The toolbar keeps a fixed 50dp row so the Agent / 九键
+  buttons never shift, and the bottom row leaves a visual gap above the
+  navigation bar.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -7,18 +12,35 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="50dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="8dp">
+        android:paddingHorizontal="6dp">
         <Button
             android:id="@+id/btnAgent"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="44dp"
+            android:minWidth="88dp"
+            android:minHeight="0dp"
+            android:paddingHorizontal="12dp"
+            android:singleLine="true"
             android:background="@drawable/bg_primary_button"
             android:textColor="#FFFFFF"
-            android:minWidth="88dp"
+            android:textSize="15sp"
             android:text="@string/toolbar_agent" />
+        <Button
+            android:id="@+id/btnNineKey"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_marginStart="6dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:paddingHorizontal="14dp"
+            android:singleLine="true"
+            android:background="@drawable/bg_secondary_button"
+            android:textColor="@color/text"
+            android:textSize="14sp"
+            android:text="@string/toolbar_nine_key" />
         <ImageView
             android:id="@+id/imeIndicator"
             android:layout_width="wrap_content"
@@ -44,6 +66,8 @@
         android:orientation="horizontal" />
     <LinearLayout
         android:id="@+id/rowBottom"
+        android:paddingTop="2dp"
+        android:paddingBottom="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" />

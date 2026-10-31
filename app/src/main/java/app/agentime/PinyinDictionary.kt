@@ -9,11 +9,22 @@ package app.agentime
  * no large lexicon and no licensing-classified dictionary data beyond the
  * handful hard-coded here for the technical demo.
  *
- * Full Chinese typing acceptance is PENDING: a mature licensed engine
- * (Sogou / Baidu / fcitx5 / Rime, etc.) must be evaluated for license, dictionary
- * license, offline capability and integration cost before integration.
+ * This dictionary is retained only as the development fallback for
+ * RimeChineseInputEngine when the APK is built without librime JNI ABIs.
+ * It must not be described as the production Chinese engine.
  */
 object PinyinDictionary {
+
+    private val t9Groups = mapOf(
+        'a' to '2', 'b' to '2', 'c' to '2',
+        'd' to '3', 'e' to '3', 'f' to '3',
+        'g' to '4', 'h' to '4', 'i' to '4',
+        'j' to '5', 'k' to '5', 'l' to '5',
+        'm' to '6', 'n' to '6', 'o' to '6',
+        'p' to '7', 'q' to '7', 'r' to '7', 's' to '7',
+        't' to '8', 'u' to '8', 'v' to '8',
+        'w' to '9', 'x' to '9', 'y' to '9', 'z' to '9'
+    )
 
     // A very small seed. Not representative of full Chinese input.
     private val table: Map<String, List<String>> = mapOf(
@@ -68,5 +79,21 @@ object PinyinDictionary {
         if (key.isEmpty()) return null
         table[key]?.firstOrNull()?.let { return it }
         return null
+    }
+
+    /** Returns candidates whose full Pinyin spelling matches a T9 digit string. */
+    fun t9Candidates(digits: String): List<String> {
+        val key = digits.trim()
+        if (key.isEmpty() || key.any { it !in '2'..'9' }) return emptyList()
+        return table.asSequence()
+            .filter { (pinyin, _) ->
+                pinyin.length == key.length &&
+                    pinyin.all { ch -> t9Groups[ch] != null } &&
+                    pinyin.mapNotNull { t9Groups[it] }.joinToString("") == key
+            }
+            .flatMap { it.value.asSequence() }
+            .distinct()
+            .take(6)
+            .toList()
     }
 }
