@@ -3,7 +3,20 @@ Agent IME backend proxy.
 
 Standard library only. Holds the upstream API key (from env), authenticates
 clients with a shared bearer token (from env), enforces a daily quota, applies
-an upstream timeout, and forwards chat requests to deepseek-flash.
+an upstream timeout, and forwards chat requests to DeepSeek.
+
+Endpoints:
+  GET  /healthz                 -> {"ok": true}
+  GET  /metrics                 -> counters (auth required)
+  POST /v1/chat                 -> {"answer": "...", "usage": {...}}   (non-streaming)
+  POST /v1/chat/stream          -> text/event-stream of OpenAI-style delta frames
+                                   data: {"choices":[{"delta":{"content":"..."}}]}
+                                   data: [DONE]
+                                   data: {"error":"...","status":...}      (on failure)
+
+Streaming requests can be cancelled by the client: when the app closes the
+socket, the write fails and we close the upstream connection, which stops token
+generation immediately.
 
 It DOES NOT log request/response bodies. Only metrics (counts, tokens,
 latency, error classes) are kept in memory.
@@ -28,14 +41,31 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 UPSTREAM_URL = os.environ.get(
     "UPSTREAM_URL", "https://api.deepseek.com/v1/chat/completions"
 )
-# Verified available model. Do not switch to deepseek-chat unless you have confirmed it.
-UPSTREAM_MODEL = os.environ.get("UPSTREAM_MODEL", "deepseek-flash")
-UPSTREAM_API_KEY = os.environ.get("UPSTREAM_API_KEY", "")
+# Verified available model name (deepseek-chat). Override with UPSTREAM_MODEL.
+UPSTREAM_MODEL = os.environ.get("UPSTREAM_MODEL", "deepseek-chat")
+# Either UPSTREAM_API_KEY or the plain DEEPSEEK_API_KEY env var works.
+UPSTREAM_API_KEY = os.environ.get("UPSTREAM_API_KEY") or os.environ.get(
+    "DEEPSEEK_API_KEY", ""
+)
 CLIENT_TOKEN = os.environ.get("CLIENT_TOKEN", "")
 DAILY_QUOTA = int(os.environ.get("DAILY_QUOTA", "50"))
 TIMEOUT_SECONDS = float(os.environ.get("TIMEOUT_SECONDS", "35"))
-HOST = os.environ.get("HOST", "0.0.0.0")
+HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8787"))
+# Offline mode: emit synthetic streamed tokens instead of calling upstream.
+MOCK_UPSTREAM = os.environ.get("MOCK_UPSTREAM", "") == "1"
+# Upstream proxy is opt-in. The environment often has HTTP(S)_PROXY pointing at
+# a local proxy that may not be running (or may not route api.deepseek.com);
+# urllib honours those variables by default, so we install our own opener that
+# ignores them unless UPSTREAM_PROXY is explicitly set.
+UPSTREAM_PROXY = os.environ.get("UPSTREAM_PROXY", "").strip()
+if UPSTREAM_PROXY:
+    _PROXY_HANDLER = urllib.request.ProxyHandler(
+        {"http": UPSTREAM_PROXY, "https": UPSTREAM_PROXY}
+    )
+else:
+    _PROXY_HANDLER = urllib.request.ProxyHandler({})
+UPSTREAM_OPENER = urllib.request.build_opener(_PROXY_HANDLER)
 
 # Upper bound on request bodies; also bounds worst-case read time.
 MAX_BODY_BYTES = 200_000
@@ -43,6 +73,12 @@ MAX_BODY_BYTES = 200_000
 # of the upstream timeout, so a client that declares a Content-Length but never
 # sends bytes cannot hang a worker thread indefinitely.
 CLIENT_READ_TIMEOUT = float(os.environ.get("CLIENT_READ_TIMEOUT", "10"))
+
+SYSTEM_PROMPT = os.environ.get(
+    "SYSTEM_PROMPT",
+    "你是手机输入法里的写作助手。用简体中文回答，简洁直接，"
+    "不要使用 Markdown、列表或代码块，回答控制在 120 字以内。",
+)
 
 # Single shared quota bucket: the token is shared, so the quota is shared.
 SHARED_QUOTA_ID = "shared"
@@ -131,7 +167,7 @@ def _parse_content_length(value) -> int | None:
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "AgentImeBackend/0.2"
+    server_version = "AgentImeBackend/0.3"
     # Socket-level timeout applied before we read the request body.
     timeout = CLIENT_READ_TIMEOUT
 
@@ -198,7 +234,12 @@ class Handler(BaseHTTPRequestHandler):
                 pass
 
     def _handle_post(self):
-        if self.path != "/v1/chat":
+        want_stream = False
+        if self.path == "/v1/chat":
+            want_stream = False
+        elif self.path == "/v1/chat/stream":
+            want_stream = True
+        else:
             self._send_json(404, {"error": "not_found"})
             return
         if not self._require_auth():
@@ -255,7 +296,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(400, {"error": "no_messages"})
             return
 
-        if not UPSTREAM_API_KEY:
+        if not MOCK_UPSTREAM and not UPSTREAM_API_KEY:
             self._send_json(500, {"error": "server_misconfigured"})
             return
 
@@ -267,27 +308,41 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(429, {"error": "quota_exceeded", "used": used})
             return
 
-        upstream_body = {
+        if messages[0].get("role") != "system":
+            messages = [{"role": "system", "content": SYSTEM_PROMPT}] + messages
+
+        if want_stream:
+            self._respond_stream(messages)
+        else:
+            self._respond_chat(messages)
+
+    # ------------------------------------------------------------------ chat
+
+    def _upstream_body(self, messages, stream: bool) -> bytes:
+        body = {
             "model": UPSTREAM_MODEL,
             "messages": messages,
             "temperature": 0.4,
-            "stream": False,
-            # Upstream thinking disabled: keep first-token latency bounded and
-            # avoid reasoning traces leaking through toolchains.
-            "thinking": {"type": "disabled"},
+            "stream": stream,
         }
+        return json.dumps(body).encode("utf-8")
+
+    def _open_upstream(self, messages, stream: bool):
+        r = urllib.request.Request(
+            UPSTREAM_URL,
+            data=self._upstream_body(messages, stream),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {UPSTREAM_API_KEY}",
+            },
+            method="POST",
+        )
+        return UPSTREAM_OPENER.open(r, timeout=TIMEOUT_SECONDS)
+
+    def _respond_chat(self, messages):
         started = time.monotonic()
         try:
-            r = urllib.request.Request(
-                UPSTREAM_URL,
-                data=json.dumps(upstream_body).encode("utf-8"),
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {UPSTREAM_API_KEY}",
-                },
-                method="POST",
-            )
-            with urllib.request.urlopen(r, timeout=TIMEOUT_SECONDS) as resp:
+            with self._open_upstream(messages, False) as resp:
                 text = resp.read().decode("utf-8")
             obj = json.loads(text)
             answer = ""
@@ -303,20 +358,122 @@ class Handler(BaseHTTPRequestHandler):
             _metrics_inc("tokens_in", in_tokens)
             _metrics_inc("tokens_out", out_tokens)
             _metrics_inc("latency_ms_total", latency * 1000.0)
-            self._send_json(200, {"answer": answer, "usage": {"in": in_tokens, "out": out_tokens}})
+            self._send_json(
+                200, {"answer": answer, "usage": {"in": in_tokens, "out": out_tokens}}
+            )
         except urllib.error.HTTPError as e:
-            latency = time.monotonic() - started
             _metrics_inc("requests_upstream_http_error")
-            _metrics_inc("latency_ms_total", latency * 1000.0)
             self._send_json(502, {"error": "upstream_error", "status": e.code})
         except (TimeoutError, urllib.error.URLError, socket.timeout):
-            latency = time.monotonic() - started
             _metrics_inc("requests_timeout_or_net")
-            _metrics_inc("latency_ms_total", latency * 1000.0)
             self._send_json(504, {"error": "upstream_timeout"})
         except Exception:
             _metrics_inc("requests_unexpected_error")
             self._send_json(500, {"error": "unexpected"})
+
+    # -------------------------------------------------------------- streaming
+
+    def _sse_start(self) -> bool:
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("X-Accel-Buffering", "no")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            self.close_connection = True
+            self.wfile.flush()
+            return True
+        except (BrokenPipeError, ConnectionResetError, socket.timeout, OSError):
+            return False
+
+    def _sse_write(self, payload) -> bool:
+        """Writes one SSE frame. Returns False if the client went away."""
+        try:
+            line = "data: " + json.dumps(payload, ensure_ascii=False) + "\n\n"
+            self.wfile.write(line.encode("utf-8"))
+            self.wfile.flush()
+            return True
+        except (BrokenPipeError, ConnectionResetError, socket.timeout, OSError):
+            return False
+
+    def _respond_stream(self, messages):
+        started = time.monotonic()
+        if not self._sse_start():
+            _metrics_inc("stream_client_gone_before_start")
+            return
+        if MOCK_UPSTREAM:
+            self._mock_stream(messages, started)
+            return
+        out_tokens = 0
+        resp = None
+        try:
+            resp = self._open_upstream(messages, True)
+            # Follow upstream frames: keep only the delta.content text so the
+            # client never has to know about provider-specific framing.
+            while True:
+                raw_line = resp.readline()
+                if not raw_line:
+                    break
+                line = raw_line.decode("utf-8", "replace").strip()
+                if not line or not line.startswith("data:"):
+                    continue
+                data = line[5:].strip()
+                if data == "[DONE]":
+                    break
+                try:
+                    obj = json.loads(data)
+                except Exception:
+                    continue
+                try:
+                    delta = obj["choices"][0].get("delta") or {}
+                    piece = delta.get("content")
+                except Exception:
+                    piece = None
+                if piece:
+                    if not self._sse_write(
+                        {"choices": [{"delta": {"content": piece}}]}
+                    ):
+                        _metrics_inc("stream_client_cancelled")
+                        return
+                    out_tokens += 1
+            if not self._sse_write(
+                {"usage": {"out_chunks": out_tokens}, "done": True}
+            ):
+                _metrics_inc("stream_client_cancelled")
+                return
+            self._sse_write("[DONE]")
+            _metrics_inc("stream_ok")
+            _metrics_inc("latency_ms_total", (time.monotonic() - started) * 1000.0)
+        except urllib.error.HTTPError as e:
+            _metrics_inc("stream_upstream_http_error")
+            self._sse_write({"error": "upstream_error", "status": e.code})
+        except (TimeoutError, urllib.error.URLError, socket.timeout):
+            _metrics_inc("stream_timeout_or_net")
+            self._sse_write({"error": "upstream_timeout"})
+        except Exception:
+            _metrics_inc("stream_unexpected_error")
+            self._sse_write({"error": "unexpected"})
+        finally:
+            if resp is not None:
+                try:
+                    resp.close()  # also aborts generation when cancelled
+                except Exception:
+                    pass
+
+    def _mock_stream(self, messages, started):
+        text = "这是离线模拟回答：后端未连接上游模型。你问的是「" + _last_user_text(
+            messages
+        ) + "」。"
+        for ch in text:
+            if not self._sse_write({"choices": [{"delta": {"content": ch}}]}):
+                _metrics_inc("stream_client_cancelled")
+                return
+            time.sleep(0.02)
+        self._sse_write({"done": True})
+        self._sse_write("[DONE]")
+        _metrics_inc("stream_ok")
+        _metrics_inc("latency_ms_total", (time.monotonic() - started) * 1000.0)
 
     def _read_exact(self, n: int) -> bytes:
         """Read exactly n bytes or fewer on EOF. Uses non-blocking-ish reads
@@ -332,13 +489,31 @@ class Handler(BaseHTTPRequestHandler):
         return b"".join(chunks)
 
 
+def _last_user_text(messages) -> str:
+    for m in reversed(messages):
+        if m.get("role") == "user":
+            return str(m.get("content", ""))[:40]
+    return ""
+
+
 def main() -> None:
-    if not UPSTREAM_API_KEY:
-        print("[agentime-backend] WARNING: UPSTREAM_API_KEY not set; POST /v1/chat will return 500.")
+    if MOCK_UPSTREAM:
+        print("[agentime-backend] MOCK_UPSTREAM=1: no upstream calls, synthetic stream.")
+    elif not UPSTREAM_API_KEY:
+        print(
+            "[agentime-backend] WARNING: neither UPSTREAM_API_KEY nor DEEPSEEK_API_KEY is set; "
+            "POST /v1/chat* will return 500."
+        )
     if not CLIENT_TOKEN:
-        print("[agentime-backend] WARNING: CLIENT_TOKEN not set; all client requests will fail with 500.")
-    print(f"[agentime-backend] listening on {HOST}:{PORT}, model={UPSTREAM_MODEL}")
+        print(
+            "[agentime-backend] WARNING: CLIENT_TOKEN not set; all client requests will fail with 500."
+        )
+    print(
+        f"[agentime-backend] listening on {HOST}:{PORT}, model={UPSTREAM_MODEL}, "
+        f"stream={not MOCK_UPSTREAM}"
+    )
     httpd = ThreadingHTTPServer((HOST, PORT), Handler)
+    httpd.daemon_threads = True
     httpd.serve_forever()
 
 

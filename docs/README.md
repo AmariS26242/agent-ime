@@ -13,6 +13,14 @@ docs/acceptance-evidence/        # 4 份报告 + measure_ime.py 入库；png/xml
 | [Release-内测候选版-验收-2026-10-31.md](<Release-内测候选版-验收-2026-10-31.md>) | 内测候选版总验收：签名链路、CI 流水线、Android 35 功能验收、覆盖升级、API 29 inset 补测、已知风险 |
 | [release-signing.md](<release-signing.md>) | Release keystore 位置、环境变量、本地/CI 构建、GitHub Actions Secrets、证书轮换 |
 
+## 基座选型与 Trime 实施（2026-11-01）
+
+| 文档 | 内容 |
+| --- | --- |
+| [开源基座选型-2026-11-01.md](<开源基座选型-2026-11-01.md>) | 四个开源安卓 IME 基座的硬事实对照、本机可构建性、扩展点定位、最终选 Trime 的理由与实施顺序 |
+| [Agent输入法-Trime基座-验收-2026-11-01.md](<Agent输入法-Trime基座-验收-2026-11-01.md>) | Trime 基座的 Agent 闭环验收：入口键与面板、宿主写入/改写/撤销、敏感域门控、真实 DeepSeek 流式与取消、真机 arm64 交付包 |
+| [Agent输入法-真机安装与联调-2026-11-01.md](<Agent输入法-真机安装与联调-2026-11-01.md>) | 真机安装、启用输入法、后端启动（局域网/`adb reverse`）、面板用法、排查表 |
+
 ## 输入引擎
 
 | 文档 | 内容 |
