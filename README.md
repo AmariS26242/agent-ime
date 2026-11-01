@@ -1,5 +1,14 @@
 重要：最新验收状态见 [验收记录](验收记录.md)。Android 编译状态见 GitHub Actions；源码变更不代表真机验收通过。
 
+> **2026-11-01 起路线变更**：本仓库的「自研 Kotlin 输入法壳」已停止扩展，改为在成熟开源基座 **osfans/trime（同文输入法）** 上实现 Agent 能力。
+>
+> | 仓库 | 内容 |
+> | --- | --- |
+> | [AmariS26242/agent-ime](https://github.com/AmariS26242/agent-ime)（本仓库） | 后端代理（`backend/` 0.3，SSE 流式）、选型与验收文档（`docs/`） |
+> | [AmariS26242/agent-ime-trime](https://github.com/AmariS26242/agent-ime-trime) | 输入法源码（Trime 基座 + `agentime/*` 提交），构建说明见其 `AGENTIME.md` |
+>
+> 新基座的验收记录：[Agent输入法-Trime基座-验收-2026-11-01.md](docs/Agent输入法-Trime基座-验收-2026-11-01.md)；真机安装见 [Agent输入法-真机安装与联调-2026-11-01.md](docs/Agent输入法-真机安装与联调-2026-11-01.md)。下文为旧版自研壳的说明，保留作历史记录。
+
 # Agent 输入法（第一阶段技术演示）
 
 本仓库是“个人 Agent 输入法”第一阶段的**实现代码**，并非可上线的产品。请阅读“已知限制”，其中若干验收项（尤其是真机验收与中文输入质量）**尚未通过**。
